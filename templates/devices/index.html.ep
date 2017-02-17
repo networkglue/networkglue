@@ -1,0 +1,56 @@
+                <!-- Page Heading -->
+                <div class="row"><h3>Devices <small><%= $filterheader %>Overview</small></h2><hr></div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="table-responsive">
+                            <table class="display responsive no-wrap" id="devicetable" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="2%">&nbsp;</th>
+                                        <th>Hostname</th>
+                                        <th width="20%">IP Address</th>
+                                        <th width="12%">ACS 1</th>
+                                        <th width="12%">ISE 2</th>
+                                        <th width="12%">Intermapper 3</th>
+                                        <th width="12%">HP NA 4</th>
+                                        <!--<th width="8%">Cacti 6</th>
+                                        <th width="7%">LDAP 7</th>
+                                        <th width="5%">AD 8</th>
+                                        <th width="7%">Nagios 9</th>-->
+                                        <th width="8%">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                % foreach my $device (sort keys %{$devices}) {                
+                                    <tr>
+                                        <td><input type="checkbox" name="check_<%= $devices->{$device}->{id} %>" value="1"></td>
+                                        </td>
+                                        <td><a href="/devices/<%= $devices->{$device}->{id} %>"><%= $devices->{$device}->{hostname} %></a></td>
+                                        <td><%= $devices->{$device}->{ipaddress} %></td>
+                                        <td><i class="fa <%= $devices->{$device}->{acs} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $devices->{$device}->{ise} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $devices->{$device}->{intermapper} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $devices->{$device}->{hpna} %>" aria-hidden="true"></i></td>
+                                        <!--<td><i class="fa <%= $devices->{$device}->{cacti} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $devices->{$device}->{ldap} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $devices->{$device}->{ad} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $devices->{$device}->{nagios} %>" aria-hidden="true"></i></td>-->
+                                        <td><form style="display: inline" method="delete" action="/devices/<%= $devices->{$device}->{id} %>"><input type="hidden" name="_method" value="delete"><button type="submit" class="btn btn-xs btn-danger" type="submit"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button></form>&nbsp;
+                                        </td>
+                                    </tr>
+% }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->

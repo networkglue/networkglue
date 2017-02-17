@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Network Glue - Data Source Setup</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- DataTable Core CSS -->
+    <link href="/css/jquery.dataTables.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="/css/sb-admin.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- jQuery -->
+    <script src="/js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- DataTable Core JavaScript -->
+    <script src="/js/jquery.dataTables.min.js"></script>
+    <script src="/js/dataTables.buttons.min.js"></script>
+    <script src="/js/buttons.flash.min.js"></script>
+    <script src="/js/pdfmake.min.js"></script>
+    <script src="/js/vfs_fonts.js"></script>
+    <script src="/js/buttons.html5.min.js"></script>
+    <script src="/js/buttons.print.min.js"></script>
+    <script src="/js/jszip.min.js"></script>
+    <script src="/js/dataTables.colReorder.min.js"></script>
+    <script src="/js/dataTables.select.min.js"></script>
+
+    <style>
+    .disabled {
+            z-index: 1000;
+            background-color: lightgrey;
+            opacity: 0.6;
+            /*pointer-events: none;*/
+        }
+        
+    .panel-footer .accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+    color: grey;         /* adjust as needed */
+    }
+    .panel-footer .accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
+    }
+
+    </style>
+
+    <link href="/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="/js/bootstrap-toggle.min.js"></script>
+    <script>
+        $(document).ready(function(){
+                
+          $(document).on('show','.accordion', function (e) {
+          $(e.target).prev('.collapse').addClass('glyphicon-chevron-up');
+          alert("show");
+          });
+    
+          $(document).on('hide','.accordion', function (e) {
+          $(this).find('.collapse').not($(e.target)).removeClass('glyphicon-chevron-up');
+          alert("hide");
+          });
+                
+          $('#accountgrouptable').DataTable( {
+            colReorder: true,
+            responsive: true,
+            pageLength: 50,
+                buttons: [
+                    'copyHtml5','excelHtml5','csvHtml5','pdfHtml5'
+                ],
+            columnDefs: [ {
+            orderable: false,
+            className: 'select-checkbox',
+            targets:   0
+        } ],
+        select: {
+            style:    'os',
+            selector: 'td:first-child'
+        },
+        order: [[ 1, 'asc' ]]
+                } );
+  
+        $('#select_all').on('change', function () {
+            if ($(this).is(':checked')) {
+                $('input.check_list').each(function () {
+                    this.checked = true;
+                });
+            } else {
+                $('input.check_list').each(function () {
+                    this.checked = false;
+                });
+            }
+        });
+        
+  });
+
+        function buildDelete()
+        { var url = "";
+          var first = "";
+          $('input.check_list:checkbox:checked').each(function () {
+          if (!first)
+          { first = $(this).val();
+            return true;
+          } 
+          url = url + "extraid="+$(this).val()+"&";
+                });
+          url = "/accountgroups/"+ first +"?_method=delete&" + url;
+          document.location.href = url;
+        }
+
+    </script>
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">Network Glue</a>
+            </div>
+            <!-- Top Menu Items -->
+            <ul class="nav navbar-left top-nav">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Data <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="/accountgroups/new/"><i class="fa fa-fw fa-plus"></i> Add</a>
+                        </li>
+                        <li>
+                            <a href="#" onclick="buildDelete()"><i class="fa fa-fw fa-close"></i> Delete</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="/accountgroups/synchronize/<%=$filter %>"><i class="fa fa-fw fa-refresh"></i> Synchronize</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Settings <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="/datasources/"><i class="fa fa-fw fa-database"></i> Data Sources</a>
+                        </li>
+                        <li>
+                            <a href="/datasources/import/"><i class="fa fa-fw fa-database"></i> Import Data</a>
+                        </li>
+                        <li>
+                            <a href="/mappings/"><i class="fa fa-fw fa-tasks"></i> Mappings</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-right top-nav">
+                 <form class="navbar-form navbar-left">
+                <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search">
+                </div>
+                <button type="submit" class="btn btn-default btn-sm">Submit</button>
+                </form>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b class="caret"></b></a>
+                    <ul class="dropdown-menu alert-dropdown">
+                        <li>
+                            <a href="#">Alert Name <span class="label label-default">Alert Badge</span></a>
+                        </li>
+                        <li>
+                            <a href="#">Alert Name <span class="label label-primary">Alert Badge</span></a>
+                        </li>
+                        <li>
+                            <a href="#">Alert Name <span class="label label-success">Alert Badge</span></a>
+                        </li>
+                        <li>
+                            <a href="#">Alert Name <span class="label label-info">Alert Badge</span></a>
+                        </li>
+                        <li>
+                            <a href="#">Alert Name <span class="label label-warning">Alert Badge</span></a>
+                        </li>
+                        <li>
+                            <a href="#">Alert Name <span class="label label-danger">Alert Badge</span></a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="#">View All</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> John Smith <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-fw fa-gear"></i> Settings</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="/logout/"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-question"></i> Help <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="#"><i class="fa fa-fw fa-rebel"></i> About </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="#"><i class="fa fa-fw fa-empire"></i> Documentation</a>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
+            <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav side-nav">
+                    <li>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#accountsmenu"><i class="fa fa-fw fa-users"></i> Accounts <i class="fa fa-fw fa-caret-down"></i></a>
+                        <ul id="accountsmenu" class="collapse">
+                            <li>
+                                <a href="/accounts/">All Accounts</a>
+                            </li>
+                % foreach my $item (sort keys %{$items}) {                
+                            <li>
+                                <a href="/accounts?filter=<%= $item %>"><%= $items->{$item} %> Accounts</a>
+                            </li>
+% }
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#accountgroupsmenu"><i class="fa fa-fw fa-users"></i> Account Groups <i class="fa fa-fw fa-caret-down"></i></a>
+                        <ul id="accountgroupsmenu" class="collapse">
+                            <li>
+                                <a href="/accountgroups">All Accounts Groups</a>
+                            </li>
+                % foreach my $item (sort keys %{$items}) {                
+                            <li>
+                                <a href="/accountgroups?filter=<%= $item %>"><%= $items->{$item} %> Account Groups</a>
+                            </li>
+% }
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#devicesmenu"><i class="fa fa-fw fa-tasks"></i> Devices <i class="fa fa-fw fa-caret-down"></i></a>
+                        <ul id="devicesmenu" class="collapse">
+                            <li>
+                                <a href="/devices/">All Devices</a>
+                            </li>
+                            <li>
+                                <a href="#">ACS Devices</a>
+                            </li>
+                            <li>
+                                <a href="#">ISE Devices</a>
+                            </li>
+                            <li>
+                                <a href="#">Intermapper Devices</a>
+                            </li>
+                            <li>
+                                <a href="#">HP NA Devices</a>
+                            </li>
+                            <li>
+                                <a href="#">Cacti Devices</a>
+                            </li>
+                            <li>
+                                <a href="#">LDAP Devices</a>
+                            </li>
+                            <li>
+                                <a href="#">AD Devices</a>
+                            </li>
+                            <li>
+                                <a href="#">Nagios Devices</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#devicegroupsmenu"><i class="fa fa-fw fa-tasks"></i> Device Groups <i class="fa fa-fw fa-caret-down"></i></a>
+                        <ul id="devicegroupsmenu" class="collapse">
+                            <li>
+                                <a href="#">All Device Groups</a>
+                            </li>
+                            <li>
+                                <a href="#">ACS Groups</a>
+                            </li>
+                            <li>
+                                <a href="#">ISE Groups</a>
+                            </li>
+                            <li>
+                                <a href="#">Intermapper Groups</a>
+                            </li>
+                            <li>
+                                <a href="#">HP NA Groups</a>
+                            </li>
+                            <li>
+                                <a href="#">Cacti Groups</a>
+                            </li>
+                            <li>
+                                <a href="#">LDAP Groups</a>
+                            </li>
+                            <li>
+                                <a href="#">AD Groups</a>
+                            </li>
+                            <li>
+                                <a href="#">Nagios Groups</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </nav>
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+<%= content %>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+</body>
+
+</html>

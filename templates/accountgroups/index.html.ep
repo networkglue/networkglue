@@ -1,0 +1,54 @@
+                <!-- Page Heading -->
+                <div class="row"><h3>Account Groups <small><%= $filterheader %>Overview</small></h2><hr></div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="table-responsive">
+                            <table class="display responsive no-wrap" id="accountgrouptable" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="2%"><input type="checkbox" id="select_all" name="select_all" value="1"></th>
+                                        <th width="10%">User Name</th>
+                                        <th width="5%">ACS 1</th>
+                                        <th width="5%">ISE 2</th>
+                                        <th width="9%">Intermapper 3</th>
+                                        <th width="8%">HP NA 4</th>
+                                        <!--<th width="8%">Cacti 5</th>
+                                        <th width="7%">LDAP 6</th>
+                                        <th width="5%">AD 7</th>
+                                        <th width="7%">Nagios 8</th>-->
+                                        <th width="4%">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                % foreach my $accountgroup (sort keys %{$accountgroups}) {                
+                                    <tr>
+                                        <td><input type="checkbox" class="check_list" id="<%= $accountgroups->{$accountgroup}->{name} %>" name="check_<%= $accountgroups->{$accountgroup}->{name} %>" value="<%= $accountgroups->{$accountgroup}->{name} %>"></td>
+                                        </td>
+                                        <td><a href="/accountgroups/<%= $accountgroups->{$accountgroup}->{name} %>"><%= $accountgroups->{$accountgroup}->{name} %></a></td>
+                                        <td><i class="fa <%= $accountgroups->{$accountgroup}->{acs} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $accountgroups->{$accountgroup}->{ise} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $accountgroups->{$accountgroup}->{intermapper} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $accountgroups->{$accountgroup}->{hpna} %>" aria-hidden="true"></i></td>
+                                        <!--<td><i class="fa <%= $accountgroups->{$accountgroup}->{cacti} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $accountgroups->{$accountgroup}->{ldap} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $accountgroups->{$accountgroup}->{ad} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $accountgroups->{$accountgroup}->{nagios} %>" aria-hidden="true"></i></td>-->
+                                        <td><form style="display: inline" method="delete" action="/accountgroups/<%= $accountgroups->{$accountgroup}->{name} %>"><input type="hidden" name="_method" value="delete"><button type="submit" class="btn btn-xs btn-danger" type="submit"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button></form>&nbsp;
+                                        </td>
+                                    </tr>
+% }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>

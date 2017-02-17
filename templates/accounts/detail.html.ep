@@ -1,0 +1,249 @@
+                <!-- Page Heading -->
+                <div class="row"><h3>Accounts <small>Details</small></h2><hr></div>
+
+                <div class="row">
+                    
+                    <div class="col-lg-8 col-md-8">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-user fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge"><%= $account->{name} %></div>
+                                        <div><%= $account->{fullname} %></div>
+                                    </div>
+                                </div>
+                            </div>
+                                <form method="post" action="/accounts/<%= $account->{name} %>">
+                                <input type="hidden" name="_method" value="put">
+                                <input type="hidden" name="acs_id" value="<%= $account->{acs_id} %>">
+                                <input type="hidden" name="intermapper_id" value="<%= $account->{intermapper_id} %>">
+                                <input type="hidden" name="ise_id" value="<%= $account->{ise_id} %>">
+                                <div class="panel-footer">
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Name</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" name="name" id="name" placeholder="name" value="<%= $account->{name} %>">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="password" value="<%= $account->{password} %>">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                </div>
+
+                                <div class="panel-footer">
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="acs_toggle" value="1"<%= $acs_toggle %>></div>
+                                
+                                <h5><a href="#" data-toggle="collapse" data-target="#acsattributes" class="accordion-toggle">Cisco ACS Attributes&nbsp;</a></h5>
+                                <div id="acsattributes" class="collapse">
+                                <div class="form-group">
+                                    <label for="acsenabled" class="col-sm-4 control-label">Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="enabled" name="acs_enabled" value="1"<%= $account->{"acs_enabled"} %>>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="form-group">
+                                    <label for="acsdescription" class="col-sm-4 control-label">Description</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="acsdescription" name="acs_description" placeholder="Description" value="<%= $account->{"acs_description"} %>">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acsidentitygroup" class="col-sm-4 control-label">Identity Group</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="acsidentitygroupname" name="acs_identitygroupname">
+                % foreach my $acsidgroup (sort keys %{$acsidgroups}) {                
+                                            <option value="<%= $acsidgroup %>"<%= $acsidgroups->{$acsidgroup}{"selected"} %>><%= $acsidgroups->{$acsidgroup}{"name"} %></option>
+% }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acsenablepassword" class="col-sm-4 control-label">Enable Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" name="acs_enablepassword" id="acsenablepassword" placeholder="Enable Password" value="<%= $account->{"acs_enablepassword"} %>">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="acspasswordneverexpires" class="col-sm-4 control-label">Password Never Expires</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="passwordneverexpires" name="acs_passwordneverexpires" value="1"<%= $account->{"acs_passwordneverexpires"} %>>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="acsdateexceedsenabled" class="col-sm-4 control-label">Expiration Date Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="dateexceedsenabled" name="acs_dateexceedsenabled" value="1"<%= $account->{"acs_dateexceedsenabled"} %>>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="acsdateexceeds" class="col-sm-4 control-label">Expiration Date</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="acsdateexceeds" name="acs_dateexceeds" placeholder="01/01/2017" value="<%= $account->{"acs_dateexceeds"} %>">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="acspasswordtype" class="col-sm-4 control-label">Password Type</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="acspasswordtype" name="acs_passwordtype" placeholder="Internal" value="<%= $account->{"acs_passwordtype"} %>">
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+                                </div>
+                                </div> <!-- Cisco ACS Attributes Panel -->
+
+                                <div class="panel-footer">
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="ise_toggle" value="1"<%= $ise_toggle %>></div>
+                                <h5><a href="#" data-toggle="collapse" class="accordion-toggle" data-target="#iseattributes">Cisco ISE Attributes&nbsp;</a></h5>
+                                <div id="iseattributes" class="collapse">
+
+                                <div class="form-group">
+                                    <label for="iseenabled" class="col-sm-4 control-label">Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="enabled" name="ise_enabled" value="1"<%= $account->{"ise_enabled"} %>>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="form-group">
+                                    <label for="isefirstname" class="col-sm-4 control-label">First Name</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="isefirstname" name="ise_firstname" placeholder="First Name" value="<%= $account->{"ise_firstname"} %>">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="iselastname" class="col-sm-4 control-label">Last Name</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="iselastname" name="ise_lastname" placeholder="Last Name" value="<%= $account->{"ise_lastname"} %>">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="iseidentitygroups" class="col-sm-4 control-label">Identity Groups</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="iseidentitygroups" name="ise_identitygroups">
+                % foreach my $iseidgroup (sort keys %{$iseidgroups}) {                
+                                            <option value="<%= $iseidgroup%>"<%= $iseidgroups->{$iseidgroup}{"selected"} %>><%= $iseidgroups->{$iseidgroup}{"name"} %></option>
+% }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="iseemail" class="col-sm-4 control-label">E-Mail</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="iseemail" name="ise_email" placeholder="E-Mail" value="<%= $account->{"ise_email"} %>">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="iseenablepassword" class="col-sm-4 control-label">Enable Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" name="ise_enablepassword" id="iseenablepassword" placeholder="Enable Password" value="<%= $account->{"ise_enablepassword"} %>">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="isechangepassword" class="col-sm-4 control-label">Change Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="isechangepassword" name="ise_changepassword" value="1"<%= $account->{"ise_changepassword"} %>>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="iseexpiryDateEnabled" class="col-sm-4 control-label">Expiration Date Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="iseexpirydateenabled" name="ise_expirydateenabled" value="1"<%= $account->{"ise_expirydateenabled"} %>>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="iseexpirydate" class="col-sm-4 control-label">Expiration Date</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="iseexpirydate" name="ise_expirydate" placeholder="01/01/2017" value="<%= $account->{"ise_expirydate"} %>">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="isepasswordidstore" class="col-sm-4 control-label">Password ID Store</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="isepasswordidstore" name="ise_passwordidstore" placeholder="Internal" value="<%= $account->{"ise_passwordidstore"} %>">
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+                                </div>
+                                </div> <!-- Cisco ISE Attributes Panel -->
+
+                                <div class="panel-footer">
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="im_toggle" value="1"<%= $im_toggle %>></div>
+                                <h5><a href="#" data-toggle="collapse"  class="accordion-toggle" data-target="#intermapperattributes">Intermapper Attributes&nbsp;</a></h5>
+                                <div id="intermapperattributes" class="collapse">
+
+                                <div class="form-group">
+                                    <label for="intermappergroups" class="col-sm-4 control-label">Groups</label>
+
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="intermappergroups" name="intermapper_groups">
+                % foreach my $imidgroup (sort keys %{$imidgroups}) {                
+                                            <option value="<%= $imidgroup %>"<%= $imidgroups->{$imidgroup}{"selected"} %>><%= $imidgroups->{$imidgroup}{"name"} %></option>
+% }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="intermapperexternal" class="col-sm-4 control-label">External</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="intermapperexternal" name="intermapper_external" value="1"<%= $account->{"intermapper_external"} %>>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="intermapperguest" class="col-sm-4 control-label">Guest</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="intermapperguest" name="intermapper_guest" placeholder="Guest Login" value="<%= $account->{"intermapper_guest"} %>">
+                                    </div>
+                                </div>
+
+                                </div>
+                                </div> <!-- Cisco ISE Attributes Panel -->
+
+
+                                <div class="panel-footer">                                
+                                <div class="form-group">
+                                  <div class="col-sm-12">
+                                        <a href="/accounts/" class="btn btn-default pull-left">Close</a>
+                                        <button type="submit" class="btn btn-primary pull-right">Save changes</button>
+                                  </div>
+                                </div>
+                                </form>
+                                <div class="clearfix"></div>
+                                </div><!-- panel footer -->
+                                
+                                </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->

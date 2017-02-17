@@ -1,0 +1,225 @@
+                <!-- Page Heading -->
+                <div class="row"><h3>Devices <small>Create New Device</small></h2><hr></div>
+
+                <div class="row">
+                    
+                    <div class="col-lg-8 col-md-8">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-tasks fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">New Device</div>
+                                        <div>&nbsp;</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                                <div class="panel-footer">
+                                <form method="post" action="/devices/">
+                                <input type="hidden" name="_method" value="post">
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Hostname</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" name="hostname" class="form-control" id="hostname" placeholder="Hostname">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">IP Address</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" name="ipaddress" class="form-control" id="ipaddress" placeholder="IP Address">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                </div>
+
+                                <div class="panel-footer">
+                                <h5><a href="#" data-toggle="collapse" data-target="#snmpattributes">SNMP Attributes</a></h5>
+                                <div id="snmpattributes" class="collapse">
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">SNMP v2 Community String</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="hostname" placeholder="Hostname" value="public">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="priority" class="col-sm-4 control-label">SNMP v3 Authentication</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="priority" class="form-control">
+                                                <option>No Authentication, No Privacy</option>
+                                                <option>Authentication, No Privacy</option>
+                                                <option>Authentication, Privacy</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">SNMP v3 Security Name</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="hostname" placeholder="Hostname" value="security name">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="priority" class="col-sm-4 control-label">SNMP v3 Authentication Protocol</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="priority" class="col-sm-8 form-control">
+                                                <option>MD5</option>
+                                                <option>SHA</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="form-group">
+                                    <label for="priority" class="col-sm-4 control-label">SNMP v3 Privacy Protocol</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="priority" class="form-control">
+                                                <option>AES</option>
+                                                <option>DES</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">SNMP v3 Authentication Passphrase</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" id="hostname" placeholder="Hostname" value="security name">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">SNMP v3 Privacy Passphrase</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" id="hostname" placeholder="Hostname" value="security name">
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+                                </div>
+                                </div> <!-- SNMP Attributes Panel -->
+
+                                <div class="panel-footer">
+                                <h5><a href="#" data-toggle="collapse" data-target="#acsattributesgroups">ACS Attributes - Groups</a></h5>
+                                <div id="acsattributesgroups" class="collapse">
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Device Type</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="hostname" placeholder="Hostname" value="public">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Device Location</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="hostname" placeholder="Hostname" value="public">
+                                    </div>
+                                </div>
+                                
+                                <div class="clearfix"></div>
+                                </div>
+                                </div>
+                                
+                                <div class="panel-footer">
+                                <h5><a href="#" data-toggle="collapse" data-target="#acsattributestacacs">ACS Attributes - TACACS</a></h5>
+                                <div id="acsattributestacacs" class="collapse">
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">TACACS Connection</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="devices" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Shared Secret</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="hostname" placeholder="Hostname" value="public">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Legacy TACACS</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="devices" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Single Connect</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="devices" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                </div><!-- panel footer -->
+                                </div>
+
+                                <div class="panel-footer">
+                                <h5><a href="#" data-toggle="collapse" data-target="#acsattributesradius">ACS Attributes - RADIUS</a></h5>
+                                <div id="acsattributesradius" class="collapse">
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">RADIUS Connection</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="devices" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Shared Secret</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="hostname" placeholder="Hostname" value="public">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Port CoA</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="hostname" placeholder="Hostname" value="public">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Displayed in Hex</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="devices" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">KeyWrap</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="devices" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                </div><!-- panel footer -->
+                                </div>
+
+                                <div class="panel-footer">                                
+                                <div class="form-group">
+                                  <div class="col-sm-12">
+                                        <a href="/devices/" class="btn btn-default pull-left">Close</a>
+                                        <button type="submit" class="btn btn-primary pull-right">Create</button>
+                                  </div>
+                                </div>
+                                </form>
+                                <div class="clearfix"></div>
+                                </div><!-- panel footer -->
+                                
+                                </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->

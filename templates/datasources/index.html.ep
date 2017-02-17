@@ -1,0 +1,51 @@
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h2 class="page-header">
+                            Data Sources <small>Overview</small>
+                        </h2>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+
+                % foreach my $datasource (sort keys %{$datasources}) {
+                    <div class="col-lg-3 col-md-6">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-database fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge"><%= $datasources->{$datasource}->type->shortname %></div>
+                                        <div><%= $datasources->{$datasource}->type->name %></div>
+                                    </div>
+                                </div>
+                            </div>
+                                <div class="panel-footer">
+                                    <span class="pull-left"><%= $datasources->{$datasource}->hostname %></span>
+                                    <span class="pull-right">Priority:&nbsp;<b><%= $datasources->{$datasource}->priority %></b></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            <a href="/datasources/<%= $datasources->{$datasource}->id %>">
+                                <div class="panel-footer">
+                                    <span class="pull-left">View Details</span>
+                                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+    % }
+                
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->

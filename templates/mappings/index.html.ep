@@ -1,0 +1,44 @@
+                <!-- Page Heading -->
+                <div class="row"><h3>Mappings <small>Overview</small></h2><hr></div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="table-responsive">
+                            <table class="display responsive no-wrap" id="mappingtable" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="2%"><input type="checkbox" id="all" name="check_all" value="1"></th>
+                                        <th width="15%">Source Data Source</th>
+                                        <th width="10%">Source Table</th>
+                                        <th width="15%">Source Field</th>
+                                        <th width="15%">Destination Data Source</th>
+                                        <th width="10%">Destination Table</th>
+                                        <th width="15%">Destination Field</th>
+                                        <th width="5%">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                % foreach my $mapping (sort keys %{$mappings}) {                
+                                    <tr>
+                                        <td><input type="checkbox" class="check_list" id="<%= $mappings->{$mapping}->{id} %>" name="check_<%= $mappings->{$mapping}->{id} %>" value="<%= $mappings->{$mapping}->{name} %>"></td>
+                                        <td><%= $mappings->{$mapping}->{source_ds} %></td>
+                                        <td><span class="label label-success"><%= $mappings->{$mapping}->{source_table} %></span></td>
+                                        <td><span class="label label-primary"><%= $mappings->{$mapping}->{source_field} %></td>
+                                        <td><%= $mappings->{$mapping}->{destination_ds} %></td>
+                                        <td><span class="label label-success"><%= $mappings->{$mapping}->{destination_table} %></span></td>
+                                        <td><span class="label label-primary"><%= $mappings->{$mapping}->{destination_field} %></td>
+                                        <td><form style="display: inline" method="delete" action="/mappings/<%= $mappings->{$mapping}->{id} %>"><input type="hidden" name="_method" value="delete"><button type="submit" class="btn btn-xs btn-danger" type="submit"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button></form>&nbsp;
+                                    </tr>
+% }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                
+                <div class="row">
+                    <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->

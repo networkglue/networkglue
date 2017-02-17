@@ -1,0 +1,92 @@
+                <!-- Page Heading -->
+                <div class="row"><h3>Account Groups <small>Create New Account</small></h2><hr></div>
+
+                <div class="row">
+                    
+                    <div class="col-lg-8 col-md-8">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-users fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">New Account Group</div>
+                                        <div>&nbsp;</div>
+                                    </div>
+                                </div>
+                            </div>
+                                <form method="post" action="/accountgroups/">
+                                <input type="hidden" name="_method" value="post">
+                                <div class="panel-footer">
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Name</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" name="name" id="name" placeholder="name">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                </div>
+
+                                <div class="panel-footer">
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="acs_toggle" value="1"></div>                                    
+                                <h5><a href="#" data-toggle="collapse" data-target="#acsattributes">Cisco ACS Attributes</a></h5>
+                                <div id="acsattributes" class="collapse">
+                                <div class="form-group">
+                                    <label for="acsdescription" class="col-sm-4 control-label">Description</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="acsdescription" name="acs_description" placeholder="Description">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                </div>
+                                </div> <!-- Cisco ACS Attributes Panel -->
+
+                                <div class="panel-footer">
+                                <h5><a href="#" data-toggle="collapse" data-target="#iseattributes">Cisco ISE Attributes (Read-Only)</a></h5>
+                                <div id="iseattributes" class="collapse">
+
+                                <div class="form-group">
+                                    <label for="isedescription" class="col-sm-4 control-label">Description</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="isedescription" placeholder="Description" disabled>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                </div>
+                                </div> <!-- Cisco ISE Attributes Panel -->
+
+                                <div class="panel-footer">
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="im_toggle" value="1"></div>                                    
+                                <h5><a href="#" data-toggle="collapse" data-target="#intermapperattributes">Intermapper Attributes</a></h5>
+                                <div id="intermapperattributes" class="collapse">
+                                    <label for="intermapperdescription" class="col-sm-4 control-label">No additional attributes</label>                            
+                                <div class="clearfix"></div>
+                                </div>
+                                </div> <!-- Cisco ISE Attributes Panel -->
+
+
+                                <div class="panel-footer">                                
+                                <div class="form-group">
+                                  <div class="col-sm-12">
+                                        <a href="/accountgroups/" class="btn btn-default pull-left">Close</a>
+                                        <button type="submit" class="btn btn-primary pull-right">Save changes</button>
+                                  </div>
+                                </div>
+                                </form>
+                                <div class="clearfix"></div>
+                                </div><!-- panel footer -->
+                                
+                                </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->

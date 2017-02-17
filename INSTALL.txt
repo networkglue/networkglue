@@ -1,0 +1,288 @@
+
+Network Glue is currently being developed by Hendrik Van Belleghem. Project Management is done through GitHub. To contact, DM through Twitter - @networkglue
+
+Network Glue will be released as free software under the GPLv3 license, with commercial support and integration available at a later stage.
+
+See license.txt for more information.
+
+INSTALLATION INSTRUCTIONS
+=========================
+
+The current release of Network Glue is extremely experimental. I recommend not using this software in a production environment.
+
+Requirements
+------------
+Network Glue uses the following packages (and its dependencies)
+
+- Mojolicious
+- Mojox-Scaffold - https://github.com/forwardever/mojox-scaffold
+- Moose
+- DBIx::Class
+- DBD::pg
+- Net::Cisco::ACS
+- Net::Intermapper
+- Net::Cisco::ISE
+
+For testing purposes, use Net::Cisco::ACS::Mock to mimick Cisco ACS.
+
+cpanm https://github.com/beatnik/NetCiscoAcsMock/tarball/master
+
+Installation instructions:
+(On a clean Ubuntu)
+
+# apt-get install cpanminus
+# apt-get install make
+# apt-get install gcc
+
+# cpanm Moose
+# cpanm Mojolicious
+# cpanm DBIx::Class
+# cpanm Crypt::CBC
+# cpanm Crypt::Rijndael
+# cpanm Digest::MD5
+# cpanm Parallel::ForkManager
+
+# apt-get install libdbd-pg-perl
+# apt-get install libxml-sax-expat-perl
+
+# cpanm Net::Cisco::ACS
+# cpanm Net::Cisco::ISE
+# cpanm Net::Intermapper
+
+# wget https://github.com/forwardever/mojox-scaffold/archive/master.zip
+# unzip master.zip
+# cd mojox-scaffold-master
+# perl Build.PL
+# ./Build
+# ./Build install
+# cd ..
+# rm master.zip
+
+To mimick Cisco ACS, install Net::Cisco::ACS::Mock:
+
+# apt-get install sqlite3
+
+# wget https://github.com/beatnik/NetCiscoAcsMock/archive/master.zip
+# unzip master.zip
+# cd NetCiscoAcsMock-master
+# morbo -l 'http://*:8080' ./script/net_cisco_acsmock
+
+
+# su - postgres
+
+# createuser -P ngpguser
+
+Define the password for ngpguser here (or use a different user account)
+
+# psql
+
+> create role ngpguser
+
+Copy the schema below:
+
+
+CREATE TABLE accounts
+( id integer,
+  name character varying(64),
+  password character varying
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE accounts
+  OWNER TO ngpguser;
+
+CREATE TABLE accountgroups
+( id integer,
+  name character varying(64)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE accountgroups
+  OWNER TO ngpguser;
+
+CREATE TABLE ds_acs_identitygroups
+( id integer,
+  name character varying(64),
+  description character varying(128),
+  status integer,
+  checksum character varying(64),
+  PRIMARY KEY (id) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_acs_identitygroups
+  OWNER TO ngpguser;
+
+CREATE TABLE ds_acs_users
+( id integer,
+  name character varying(64),
+  password character varying,
+  enablePassword character varying,
+  description character varying(64),
+  identityGroupName integer REFERENCES ds_acs_identitygroups(id),
+  enabled bool,
+  passwordNeverExpires bool,
+  passwordType character varying(64),
+  dateExceeds character varying(16),
+  dateExceedsEnabled bool,
+  status integer,
+  checksum character varying(64),
+  created character varying(32),
+  lastmodified character varying(32),
+  PRIMARY KEY (id)
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_acs_users
+  OWNER TO ngpguser;
+
+CREATE TABLE ds_ise_identitygroup
+( id character varying(128),
+  name character varying(64),
+  description character varying(128),
+  status integer,
+  checksum character varying(64),
+  PRIMARY KEY (id) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_ise_identitygroup
+  OWNER TO ngpguser;
+
+CREATE TABLE ds_ise_internalusers
+( id character varying(64),
+  name character varying(64),
+  password character varying,
+  email character varying(128),
+  firstName character varying(64),
+  lastName character varying(64),
+  identityGroups character varying(128) REFERENCES ds_ise_identitygroup(id),
+  changePassword bool,
+  expiryDateEnabled bool,
+  expiryDate character varying(16),
+  enablePassword character varying,
+  enabled bool,
+  passwordIDStore character varying(64),
+  status integer,
+  checksum character varying(64),
+  PRIMARY KEY (id) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_ise_internalusers
+  OWNER TO ngpguser;
+
+CREATE TABLE ds_intermapper_users
+( id character varying(64),
+  name character varying(64),
+  password character varying,
+  groups character varying(128),
+  external bool,
+  enabled bool,
+  guest character varying(64),
+  status integer,
+  checksum character varying(64),
+  PRIMARY KEY (id) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_intermapper_users
+  OWNER TO ngpguser;
+
+CREATE TABLE mappings
+( source_ds integer,
+  source_table character varying(128),
+  source_field character varying(128),
+  destination_ds integer,
+  destination_table character varying(128),
+  destination_field character varying(128),
+  overwriteflag bool,
+  appendflag bool,
+  createflag bool,
+  PRIMARY KEY (id) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE mappings
+  OWNER TO ngpguser;
+
+CREATE TABLE ds_types
+( id integer,
+  shortname character varying(16),
+  name character varying(64),
+  PRIMARY KEY (id) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_types
+  OWNER TO ngpguser;
+
+CREATE TABLE ds_tables
+( id integer,
+  type integer REFERENCES ds_types(id),
+  coretable character varying(64),
+  name character varying(64),
+  tablepk character varying(64),
+  PRIMARY KEY (id) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_tables
+  OWNER TO ngpguser;
+
+CREATE TABLE ds_sources
+( id integer,
+  type integer REFERENCES ds_types(id),
+  hostname character varying(256),
+  username character varying(64),
+  password character varying(64),
+  priority integer,
+  PRIMARY KEY (id) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_sources
+  OWNER TO ngpguser;
+
+REVOKE CONNECT ON DATABASE ng FROM PUBLIC;
+
+GRANT CONNECT
+ON DATABASE ng
+TO ngpguser;
+
+REVOKE ALL
+ON ALL TABLES IN SCHEMA public 
+FROM PUBLIC;
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+ON ALL TABLES IN SCHEMA public 
+TO ngpguser;
+
+\q
+
+Import the minimal database data
+
+# psql < sql_data.sql
+
+Adjust the credentials in lib/NG.pm (main class) and sync.pl (background process for scheduled synchronizing).
+
+Install and start Morbo or Hypnotoad to start Network Glue as normal user (typically not as postgres):
+
+# wget https://github.com/networkglue/networkglue/archive/master.zip
+# unzip master.zip
+# cd networkglue-master
+
+# morbo script/ng
+-OR-
+# hypnotoad script/ng

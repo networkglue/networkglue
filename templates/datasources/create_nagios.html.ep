@@ -1,0 +1,142 @@
+                <!-- Page Heading -->
+                <div class="row"><h3>Data Sources <small>Create New Nagios Data Source</small></h2><hr></div>
+                <!-- /.row -->
+
+                <div class="row">
+                    
+                    <div class="col-lg-8 col-md-8">
+                        <div class="panel panel-green">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-database fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge">Nagios</div>
+                                        <div>Nagios</div>
+                                    </div>
+                                </div>
+                            </div>
+                                <div class="panel-footer">
+                                <div class="form-group">
+                                <form method="post" action="/datasources/">
+                                <input type="hidden" name="_method" value="post">
+                                <input type="hidden" name="target" value="nagios">
+                                    <label for="hostname" class="col-sm-4 control-label">Hostname</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="hostname" placeholder="Hostname" name="hostname">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="user" class="col-sm-4 control-label">User</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="user" placeholder="User" name="username">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password" class="col-sm-4 control-label">Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" id="password" placeholder="Password" name="password">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="ssl" class="col-sm-4 control-label">Use SSL</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" name="ssl" id="ssl" value="1" checked>
+                                    </div>
+                                </div>                                
+                                <div class="clearfix"></div>
+                                </div>
+                                <div class="panel-footer">
+                                <div class="form-group">
+                                    <label for="priority" class="col-sm-4 control-label">Priority</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="priority" class="form-control">
+                                                <option selected>1</option>
+                                                <option>2</option>
+                                                <option>3</option>
+                                                <option>4</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="form-group">
+                                    <label for="devices" class="col-sm-4 control-label">Caching</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" name="caching" id="devices" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                </div>                                
+
+                                <div class="panel-footer">
+                                        
+                                <div class="form-group">
+                                    <label for="devices" class="col-sm-4 control-label">Devices</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="devices" name="devices" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                
+                                <div class="form-group">
+                                    <label for="devicegroups" class="col-sm-4 control-label">Device Groups</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="devicegroups" name="devicegroups" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="users" class="col-sm-4 control-label">Account</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="accounts" value="1" name="accounts">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="identitygroups" class="col-sm-4 control-label">Identity Groups</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="identitygroups" value="1" name="identitygroups">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="hosts" class="col-sm-4 control-label">Hosts</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="hosts" value="1" name="hosts">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                
+                                </div>
+
+                                <div class="panel-footer">                                
+                                <div class="form-group">
+                                  <div class="col-sm-12">
+                                        <a href="/accounts/" class="btn btn-default pull-left">Close</a>
+                                        <button type="submit" class="btn btn-primary pull-right">Create</button>
+                                  </div>
+                                </div>
+                                </form>
+                                <div class="clearfix"></div>
+                                </div>
+                                </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->
