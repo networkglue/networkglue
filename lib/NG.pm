@@ -49,8 +49,11 @@ sub startup {
   $self->resources('accountgroups');
   $self->resources('accounts');
   $self->resources('mappings'); 
+  $self->resources('authentication'); 
  
   $r->route('/datasources/new/:target')->to('datasources#new_form');
+  $r->route('/authentication/new/:target')->to('authentication#new_form');
+
   # Normal route to controller
   $r->get('/')->to('main#index');
   $r->post('/init')->to('login#init');

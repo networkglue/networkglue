@@ -35,13 +35,6 @@ __PACKAGE__->table("accounts");
 
 =head1 ACCESSORS
 
-=head2 pk_id
-
-  data_type: 'integer'
-  is_auto_increment: 1
-  is_nullable: 0
-  sequence: 'accounts_pk_id_seq'
-
 =head2 id
 
   data_type: 'integer'
@@ -59,16 +52,14 @@ __PACKAGE__->table("accounts");
   is_nullable: 1
   original: {data_type => "varchar"}
 
+=head2 authentication
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
-  "pk_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "accounts_pk_id_seq",
-  },
   "id",
   { data_type => "integer", is_nullable => 1 },
   "name",
@@ -79,11 +70,13 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     original    => { data_type => "varchar" },
   },
+  "authentication",
+  { data_type => "integer", is_nullable => 1 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-02-09 12:04:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:3rxv/72Ggh8z2dbd4RK8lA
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-02-24 01:06:11
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tH4iBnZiCuvwPi4MR1fPMA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

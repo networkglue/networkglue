@@ -48,6 +48,13 @@ sub new_form { # GET /accounts/new - form to create a account
   { $iseidgroups->{$accountgroup->id} = $accountgroup->name; }
   $self->stash(iseidgroups => $iseidgroups);
 
+  my $auth_rs = $self->db->resultset('Authentication');
+  $query_rs = $auth_rs->search;
+  my $authgroups = { "0" => { "name" => "Local" } };
+  while (my $authgroup = $query_rs->next)
+  { $authgroups->{$authgroup->id} = $authgroup->hostname; }
+  $self->stash(authgroups => $authgroups);
+  
   my $im_rs = $self->db->resultset('DsIntermapperUser');
   $query_rs = $im_rs->search;
   my $imidgroups = {};
@@ -83,6 +90,18 @@ sub show { # GET /accounts/123 - show account with id 123
   }
   $self->stash(acsidgroups => $acsidgroups);
 
+  my $auth_rs = $self->db->resultset('Authentication');
+  $query_rs = $auth_rs->search;
+  my $authgroups = { "0" => { "hostname" => "Local", "type" => "-" } };
+  
+  while (my $authgroup = $query_rs->next)
+  { $authgroups->{$authgroup->id}{"hostname"} = $authgroup->hostname;
+    $authgroups->{$authgroup->id}{"type"} = $authgroup->type;
+    $authgroups->{$authgroup->id}{"selected"} = " selected" if $account->{"authentication"} && $account->{"authentication"} eq $authgroup->id;
+  }
+  $authgroups->{"0"}{"selected"} = " selected" if $account->{"authentication"} && $account->{"authentication"} eq "0";  
+  $self->stash(authgroups => $authgroups);
+  
   my $ise_rs = $self->db->resultset('DsIseIdentitygroup');
   $query_rs = $ise_rs->search;
   my $iseidgroups = {};
@@ -159,17 +178,18 @@ sub create { # POST /accounts - create new account
   $self->redirect_to('/login/') if !$self->session('logged_in');  
   my $name = $self->param("name");
   my $password = $self->param("password");
+  my $authentication = $self->param("authentication");  
 
   # Temporary fix
   my $amax = $self->db->resultset('Account')->get_column('Id');
   my $amaxid = $amax->max;
   $amaxid++;
 
-
   $self->db->resultset('Account')->create({
             name => $name,
             password => $password,
-            id => $amaxid
+            id => $amaxid,
+            authentication => $authentication,
         });
 
   my $acs_rs = $self->db->resultset('DsAcsUser');
@@ -203,6 +223,7 @@ sub create { # POST /accounts - create new account
   my $ise_toggle = $self->param("ise_toggle") || "0";
   my $im_toggle = $self->param("im_toggle") || "0";
   
+  my $acs_password = $self->param("acs_password") || $password;
   my $acs_enabled = $self->param("acs_enabled");
   my $acs_description = $self->param("acs_description");
   my $acs_identitygroupname = $self->param("acs_identitygroupname");
@@ -212,6 +233,17 @@ sub create { # POST /accounts - create new account
   my $acs_dateexceeds = $self->param("acs_dateexceeds");
   my $acs_passwordtype = $self->param("acs_passwordtype");
 
+  my $auth_rs = $self->db->resultset('Authentication');
+  $query_rs = $acs_rs->search;
+  my $authgroups = { "0" => { "hostname" => "Local"} };
+  
+  while (my $authgroup = $query_rs->next)
+  { $authgroups->{$authgroup->id}{"name"} = $authgroup->hostname;
+    $authgroups->{$authgroup->id}{"type"} = $authgroup->type;
+  }
+  $authgroups->{"0"}{"selected"} = " selected";  
+  $self->stash(authgroups => $authgroups);
+    
   # Need to store full datetime instead of date
   my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
   $mon++;
@@ -235,10 +267,11 @@ sub create { # POST /accounts - create new account
       { enabled => $acs_enabled, description => $acs_description, identitygroupname => $acs_identitygroupname,
         enablepassword => $acs_enablepassword, passwordneverexpires => $acs_passwordneverexpires,
         dateexceedsenabled => $acs_dateexceedsenabled, dateexceeds => $acs_dateexceeds, passwordtype => $acs_passwordtype,
-        name => $name, password => $password, id => $acsmaxid, status => $status_created,
+        name => $name, password => $acs_password, id => $acsmaxid, status => $status_created,
       });
   }
   
+  my $ise_password = $self->param("ise_password") || $password;
   my $ise_enabled = $self->param("ise_enabled");
   my $ise_firstname = $self->param("ise_firstname");
   my $ise_lastname = $self->param("ise_lastname"); 
@@ -268,10 +301,10 @@ sub create { # POST /accounts - create new account
         { enabled => $ise_enabled, firstname => $ise_firstname, lastname => $ise_lastname,
           identitygroups => $ise_identitygroups, email => $ise_email, enablepassword => $ise_enablepassword,
           changepassword => $ise_changepassword, expirydateenabled => $ise_expirydateenabled, expirydate=> $ise_expirydate,
-          passwordidstore => $ise_passwordidstore, name => $name, password => $password, id => $isemaxid, status => $status_created,
+          passwordidstore => $ise_passwordidstore, name => $name, password => $ise_password, id => $isemaxid, status => $status_created,
         });
   }
-  
+  my $im_password = $self->param("im_password") || $password;  
   my $intermapper_groups = $self->param("intermapper_groups");
   my $intermapper_guest = $self->param("intermapper_guest");
   my $intermapper_external = $self->param("intermapper_external");
@@ -284,7 +317,7 @@ sub create { # POST /accounts - create new account
   if ($im_toggle)
   {  $self->db->resultset('DsIntermapperUser')->create(
     { groups => $intermapper_groups, external => $intermapper_external, guest => $intermapper_guest,
-      name => $name, password => $password, id => $immaxid, status => $status_created,
+      name => $name, password => $im_password, id => $immaxid, status => $status_created,
     });
   }
   
@@ -311,10 +344,18 @@ sub update { # PUT /accounts/123 - update a account
   my $acs_toggle = $self->param("acs_toggle") || "0";
   my $ise_toggle = $self->param("ise_toggle") || "0";
   my $im_toggle = $self->param("im_toggle") || "0";
+  my $password = $self->param("password");
+  my $authentication = $self->param("authentication");  
+
+  my $acs_password = $self->param("acs_password") || $password;
+  my $ise_password = $self->param("ise_password") || $password;
+  my $im_password = $self->param("im_password") || $password;  
   
   my $name = $self->param("name");
-  my $password = $self->param("password");
   my $encpassword = encode_base64($self->cipher->encrypt($self->salt.$password.$name));
+  my $encacspassword = encode_base64($self->cipher->encrypt($self->salt.$acs_password.$name));
+  my $encisepassword = encode_base64($self->cipher->encrypt($self->salt.$ise_password.$name));
+  my $encimpassword = encode_base64($self->cipher->encrypt($self->salt.$im_password.$name));  
   
   my $acs_enabled = $self->param("acs_enabled");  
   my $acs_description = $self->param("acs_description");
@@ -325,7 +366,7 @@ sub update { # PUT /accounts/123 - update a account
   my $acs_dateexceedsenabled = $self->param("acs_dateexceedsenabled");
   my $acs_dateexceeds = $self->param("acs_dateexceeds");
   my $acs_passwordtype = $self->param("acs_passwordtype");
-  my $checksum = md5_hex($name.$encpassword.$acs_enabled.$acs_description.$acs_identitygroupname.$acs_enablepassword.$acs_passwordneverexpires.$acs_dateexceedsenabled.
+  my $checksum = md5_hex($name.$encacspassword.$acs_enabled.$acs_description.$acs_identitygroupname.$acs_enablepassword.$acs_passwordneverexpires.$acs_dateexceedsenabled.
                          $acs_dateexceeds.$acs_passwordtype);
   
   # Need to store full datetime instead of date
@@ -346,14 +387,14 @@ sub update { # PUT /accounts/123 - update a account
     $accounts->{$id}{"acs_dateexceeds"} = $acs_dateexceeds;
     $accounts->{$id}{"acs_passwordtype"} = $acs_passwordtype;
     $accounts->{$id}{"acs_lastmodified"} = $lastmodified;
-    $accounts->{$id}{"acs_password"} = $encpassword;
+    $accounts->{$id}{"acs_password"} = $encacspassword;
     
     my $acs_rs = $self->db->resultset('DsAcsUser');
     my $query_rs = $acs_rs->search({ id => $acs_id });
     $query_rs->first->update({ enabled => $acs_enabled, description => $acs_description, identitygroupname => $acs_identitygroupname,
                      enablepassword => $acs_encenablepassword, passwordneverexpires => $acs_passwordneverexpires,
                      dateexceedsenabled => $acs_dateexceedsenabled, dateexceeds => $acs_dateexceeds, passwordtype => $acs_passwordtype,
-                     name => $name, password => $encpassword, status => $status_changed, lastmodified => $lastmodified, checksum => $checksum
+                     name => $name, password => $encacspassword, status => $status_changed, lastmodified => $lastmodified, checksum => $checksum
                   });
   }
   if (!$acs_id && $acs_toggle)  
@@ -363,7 +404,7 @@ sub update { # PUT /accounts/123 - update a account
       { enabled => $acs_enabled, description => $acs_description, identitygroupname => $acs_identitygroupname,
         enablepassword => $acs_encenablepassword, passwordneverexpires => $acs_passwordneverexpires,
         dateexceedsenabled => $acs_dateexceedsenabled, dateexceeds => $acs_dateexceeds, passwordtype => $acs_passwordtype, checksum => $checksum,
-        name => $name, password => $encpassword, status => $status_created, id => $immaxid, lastmodified => $lastmodified, created => $created
+        name => $name, password => $encacspassword, status => $status_created, id => $immaxid, lastmodified => $lastmodified, created => $created
       });
       $accounts->{$id}{"acs_created"} = $created;
     }
@@ -389,7 +430,7 @@ sub update { # PUT /accounts/123 - update a account
   my $ise_expirydateenabled = $self->param("ise_expirydateenabled");
   my $ise_expirydate = $self->param("ise_expirydate");
   my $ise_passwordidstore = $self->param("ise_passwordidstore");
-  $checksum = md5_hex($name.$encpassword.$ise_enabled.$ise_firstname.$ise_lastname.$ise_identitygroups.$ise_email.$ise_encenablepassword.
+  $checksum = md5_hex($name.$encisepassword.$ise_enabled.$ise_firstname.$ise_lastname.$ise_identitygroups.$ise_email.$ise_encenablepassword.
                       $ise_changepassword.$ise_expirydateenabled.$ise_expirydate.$ise_passwordidstore);
 
   if ($ise_id && $ise_toggle)
@@ -403,14 +444,15 @@ sub update { # PUT /accounts/123 - update a account
     $accounts->{$id}{"ise_expirydateenabled"} = $ise_expirydateenabled;
     $accounts->{$id}{"ise_expirydate"} = $ise_expirydate;
     $accounts->{$id}{"ise_passwordidstore"} = $ise_passwordidstore;
-
+    $accounts->{$id}{"ise_password"} = $encisepassword;
+    
     my $ise_rs = $self->db->resultset('DsIseInternaluser');
     my $query_rs = $ise_rs->search({ id => $ise_id });
     if ($query_rs)
     { $query_rs->first->update({ enabled => $ise_enabled, firstname => $ise_firstname, lastname => $ise_lastname,
                      identitygroups => $ise_identitygroups, email => $ise_email, enablepassword => $ise_encenablepassword,
                      changepassword => $ise_changepassword, expirydateenabled => $ise_expirydateenabled, expirydate=> $ise_expirydate,
-                     passwordidstore => $ise_passwordidstore, name => $name, password => $encpassword, status => $status_changed, checksum => $checksum
+                     passwordidstore => $ise_passwordidstore, name => $name, password => $encisepassword, status => $status_changed, checksum => $checksum
                   });
     }
   }
@@ -422,7 +464,7 @@ sub update { # PUT /accounts/123 - update a account
         { enabled => $ise_enabled, firstname => $ise_firstname, lastname => $ise_lastname,
           identitygroups => $ise_identitygroups, email => $ise_email, enablepassword => $ise_encenablepassword,
           changepassword => $ise_changepassword, expirydateenabled => $ise_expirydateenabled, expirydate=> $ise_expirydate,
-          passwordidstore => $ise_passwordidstore, name => $name, password => $encpassword, status => $status_created, id => $isemaxid, checksum => $checksum
+          passwordidstore => $ise_passwordidstore, name => $name, password => $encisepassword, status => $status_created, id => $isemaxid, checksum => $checksum
         });    
      }
   }
@@ -439,17 +481,18 @@ sub update { # PUT /accounts/123 - update a account
   my $intermapper_groups = $self->param("intermapper_groups");
   my $intermapper_guest = $self->param("intermapper_guest");
   my $intermapper_external = $self->param("intermapper_external");
-  $checksum = md5_hex($name.$encpassword.$intermapper_groups.$intermapper_guest.$intermapper_external);
+  $checksum = md5_hex($name.$encimpassword.$intermapper_groups.$intermapper_guest.$intermapper_external);
 
   if ($intermapper_id && $im_toggle)
   { $accounts->{$id}{"intermapper_groups"} = $intermapper_groups;
     $accounts->{$id}{"intermapper_guest"} = $intermapper_guest;
     $accounts->{$id}{"intermapper_external"} = $intermapper_external;
+    $accounts->{$id}{"intermapper_password"} = $encimpassword;
 
     my $intermapper_rs = $self->db->resultset('DsIntermapperUser');
     my $query_rs = $intermapper_rs->search({ id => $intermapper_id });
     $query_rs->first->update({ groups => $intermapper_groups, external => $intermapper_external, guest => $intermapper_guest,
-                    name => $name, password => $encpassword, status => $status_changed, checksum => $checksum
+                    name => $name, password => $encimpassword, status => $status_changed, checksum => $checksum
                   });
   }
   
@@ -457,7 +500,7 @@ sub update { # PUT /accounts/123 - update a account
   { if ($intermapper_groups || $intermapper_guest || $intermapper_external)
    {  $self->db->resultset('DsIntermapperUser')->create(
     { groups => $intermapper_groups, external => $intermapper_external, guest => $intermapper_guest,
-      name => $name, password => $encpassword, status => $status_created, id => $immaxid, checksum => $checksum
+      name => $name, password => $encimpassword, status => $status_created, id => $immaxid, checksum => $checksum
     });
    }
   }
@@ -474,6 +517,12 @@ sub update { # PUT /accounts/123 - update a account
   
   $accounts->{$id}{"name"} = $name;
   $accounts->{$id}{"password"} = $encpassword;
+  $accounts->{$id}{"authentication"} = $authentication;
+
+  my $account_rs = $self->db->resultset('Account');
+  my $query_rs = $account_rs->search({ name => $id });
+  $query_rs->update({ name => $name, password => $encpassword, authentication => $authentication });
+
   $self->redirect_to("/accounts/$id");
 }
 

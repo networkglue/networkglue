@@ -9,14 +9,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Network Glue - Data Source Setup</title>
+    <title>Network Glue - Authentication Setup</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- DataTable Core CSS -->
-    <link href="/css/jquery.dataTables.min.css" rel="stylesheet">
-    
     <!-- Custom CSS -->
     <link href="/css/sb-admin.css" rel="stylesheet">
 
@@ -30,108 +27,55 @@
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-    <!-- jQuery -->
-    <script src="/js/jquery.js"></script>
+<style>
+       .dropdown-submenu {
+    position: relative;
+}
 
-    <!-- Bootstrap Core JavaScript -->
-    <script src="/js/bootstrap.min.js"></script>
+.dropdown-submenu>.dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -6px;
+    margin-left: -1px;
+    -webkit-border-radius: 0 6px 6px 6px;
+    -moz-border-radius: 0 6px 6px;
+    border-radius: 0 6px 6px 6px;
+}
 
-    <!-- DataTable Core JavaScript -->
-    <script src="/js/jquery.dataTables.min.js"></script>
-    <script src="/js/dataTables.buttons.min.js"></script>
-    <script src="/js/buttons.flash.min.js"></script>
-    <script src="/js/pdfmake.min.js"></script>
-    <script src="/js/vfs_fonts.js"></script>
-    <script src="/js/buttons.html5.min.js"></script>
-    <script src="/js/buttons.print.min.js"></script>
-    <script src="/js/jszip.min.js"></script>
-    <script src="/js/dataTables.colReorder.min.js"></script>
-    <script src="/js/dataTables.select.min.js"></script>
+.dropdown-submenu:hover>.dropdown-menu {
+    display: block;
+}
 
-    <style>
-    .disabled {
-            z-index: 1000;
-            background-color: lightgrey;
-            opacity: 0.6;
-            /*pointer-events: none;*/
-        }
-        
-    .panel-footer .accordion-toggle:after {
-    /* symbol for "opening" panels */
-    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
-    content: "\e114";    /* adjust as needed, taken from bootstrap.css */
-    color: grey;         /* adjust as needed */
-    }
-    .panel-footer .accordion-toggle.collapsed:after {
-    /* symbol for "collapsed" panels */
-    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
-    }
+.dropdown-submenu>a:after {
+    display: block;
+    content: " ";
+    float: right;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 5px 0 5px 5px;
+    border-left-color: #ccc;
+    margin-top: 5px;
+    margin-right: -10px;
+}
 
-    </style>
+.dropdown-submenu:hover>a:after {
+    border-left-color: #fff;
+}
 
-    <link href="/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <script src="/js/bootstrap-toggle.min.js"></script>
-    <script>
-        $(document).ready(function(){
-                
-          $(document).on('show','.accordion', function (e) {
-          $(e.target).prev('.collapse').addClass('glyphicon-chevron-up');
-          alert("show");
-          });
-    
-          $(document).on('hide','.accordion', function (e) {
-          $(this).find('.collapse').not($(e.target)).removeClass('glyphicon-chevron-up');
-          alert("hide");
-          });
-                
-          $('#accounttable').DataTable( {
-            colReorder: true,
-            responsive: true,
-            pageLength: 50,
-                buttons: [
-                    'copyHtml5','excelHtml5','csvHtml5','pdfHtml5'
-                ],
-            columnDefs: [ {
-            orderable: false,
-            className: 'select-checkbox',
-            targets:   0
-        } ],
-        select: {
-            style:    'os',
-            selector: 'td:first-child'
-        },
-        order: [[ 1, 'asc' ]]
-                } );
-  
-        $('#select_all').on('change', function () {
-            if ($(this).is(':checked')) {
-                $('input.check_list').each(function () {
-                    this.checked = true;
-                });
-            } else {
-                $('input.check_list').each(function () {
-                    this.checked = false;
-                });
-            }
-        });
-        
-  });
+.dropdown-submenu.pull-left {
+    float: none;
+}
 
-        function buildDelete()
-        { var url = "";
-          var first = "";
-          $('input.check_list:checkbox:checked').each(function () {
-          if (!first)
-          { first = $(this).val();
-            return true;
-          } 
-          url = url + "extraid="+$(this).val()+"&";
-                });
-          url = "/accounts/"+ first +"?_method=delete&" + url;
-          document.location.href = url;
-        }
-                        
-    </script>
+.dropdown-submenu.pull-left>.dropdown-menu {
+    left: -100%;
+    margin-left: 10px;
+    -webkit-border-radius: 6px 0 6px 6px;
+    -moz-border-radius: 6px 0 6px 6px;
+    border-radius: 6px 0 6px 6px;
+} 
+</style>
 </head>
 
 <body>
@@ -155,16 +99,21 @@
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Data <b class="caret"></b></a>
                     <ul class="dropdown-menu">
+
+                <li class="dropdown-submenu">
+                <a tabindex="-1" href="#"><i class="fa fa-fw fa-plus"></i> Add</a>
+                <ul class="dropdown-menu">
+                  <li><a tabindex="-1" href="/authentication/new/tacacs"><i class="fa fa-fw fa-database"></i> TACACS+</a></li>
+                  <li><a href="/authentication/new/radius"><i class="fa fa-fw fa-database"></i> RADIUS</a></li>
+                </ul>
+              </li>
+              <li>
+                <a href="#" onclick=""><i class="fa fa-fw fa-close"></i> Delete</a>
+              </li>
+              <li class="divider"></li>
+                        
                         <li>
-                            <a href="/accounts/new/"><i class="fa fa-fw fa-plus"></i> Add</a>
-                        </li>
-                        <li>
-                            <!--<a href="/accounts/?method=_delete"><i class="fa fa-fw fa-close"></i> Delete</a>-->
-                            <a href="#" onclick="buildDelete()"><i class="fa fa-fw fa-close"></i> Delete</a>
-                        </li>
-                        <li class="divider"></li>
-                        <li>
-                            <a href="/accounts/synchronize/<%=$filter %>"><i class="fa fa-fw fa-refresh"></i> Synchronize</a>
+                            <a href="#"><i class="fa fa-fw fa-refresh"></i> Synchronize</a>
                         </li>
                     </ul>
                 </li>
@@ -182,7 +131,7 @@
                         </li>
                         <li>
                             <a href="/authentication/"><i class="fa fa-fw fa-lock"></i> Authentication</a>
-                        </li>                        
+                        </li>
                     </ul>
                 </li>
             </ul>
@@ -231,7 +180,7 @@
                         </li>
                         <li class="divider"></li>
                         <li>
-                            <a href="/logout/"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+                            <a href="#"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
                         </li>
                     </ul>
                 </li>
@@ -258,24 +207,32 @@
                             <li>
                                 <a href="/accounts/">All Accounts</a>
                             </li>
-                % foreach my $item (sort keys %{$items}) {                
                             <li>
-                                <a href="/accounts?filter=<%= $item %>"><%= $items->{$item} %> Accounts</a>
+                                <a href="#">ACS Accounts</a>
                             </li>
-% }
+                            <li>
+                                <a href="#">ISE Accounts</a>
+                            </li>
+                            <li>
+                                <a href="#">Intermapper Accounts</a>
+                            </li>
                         </ul>
                     </li>
                     <li>
                         <a href="javascript:;" data-toggle="collapse" data-target="#accountgroupsmenu"><i class="fa fa-fw fa-users"></i> Account Groups <i class="fa fa-fw fa-caret-down"></i></a>
                         <ul id="accountgroupsmenu" class="collapse">
                             <li>
-                                <a href="/accountgroups">All Accounts Groups</a>
+                                <a href="#">All Accounts Groups</a>
                             </li>
-                % foreach my $item (sort keys %{$items}) {                
                             <li>
-                                <a href="/accountgroups?filter=<%= $item %>"><%= $items->{$item} %> Account Groups</a>
+                                <a href="#">ACS Groups</a>
                             </li>
-% }
+                            <li>
+                                <a href="#">ISE Groups</a>
+                            </li>
+                            <li>
+                                <a href="#">Intermapper Groups</a>
+                            </li>
                         </ul>
                     </li>
                     <li>
@@ -292,21 +249,6 @@
                             </li>
                             <li>
                                 <a href="#">Intermapper Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">HP NA Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">Cacti Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">LDAP Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">AD Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">Nagios Devices</a>
                             </li>
                         </ul>
                     </li>
@@ -325,21 +267,6 @@
                             <li>
                                 <a href="#">Intermapper Groups</a>
                             </li>
-                            <li>
-                                <a href="#">HP NA Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Cacti Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">LDAP Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">AD Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Nagios Groups</a>
-                            </li>
                         </ul>
                     </li>
                 </ul>
@@ -351,6 +278,7 @@
 
             <div class="container-fluid">
 <%= content %>
+            </div>
             <!-- /.container-fluid -->
 
         </div>
@@ -358,6 +286,12 @@
 
     </div>
     <!-- /#wrapper -->
+
+    <!-- jQuery -->
+    <script src="/js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
 
 </body>
 

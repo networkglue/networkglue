@@ -1,6 +1,8 @@
 package NG::Controller::Login;
 use Mojo::Base 'Mojolicious::Controller';
 use Data::Dumper;
+use Authen::TacacsPlus;
+use Authen::Radius;
 
 use MIME::Base64;
 
@@ -23,6 +25,7 @@ sub init
     { $self->db->resultset('Account')->create({
             name => $username,
             password => $password,
+            authentication => 0,
             id => 1
         });
       &index($self);
@@ -41,8 +44,9 @@ sub user_exists
   my $account_rs = $self->db->resultset('Account');
   my $query_rs = $account_rs->search({ name => $username});
   my $user = $query_rs->first;
+  #$self->app->log->debug($user->authentication);
   
-  if ($user)
+  if ($user && $user->authentication == 0)
   { if (length($user->password) > 64) # Expect a user password not to be longer than 64 characters!?!? 
     { my $decpassword = $self->cipher->decrypt(decode_base64($user->password));
       if ($self->salt.$password.$username eq $decpassword)
@@ -59,8 +63,29 @@ sub user_exists
       } else
       { return 0; }
     }
-  } else
-  { return 0; }
+  } 
+  if ($user && $user->authentication != 0)
+  { my $auth_rs = $self->db->resultset('Authentication');
+    my $query_rs = $auth_rs->search({ id => $user->authentication});
+    my $auth = $query_rs->first;
+    if ($auth->type eq "tacacs")
+    { my $tac = Authen::TacacsPlus->new(Host=> $auth->hostname,
+                        Key=>$auth->authkey,
+                        [Port=>$auth->port],
+                        [Timeout=>15]);
+      my $result = $tac->authen($username, $password);
+      return $result;
+    }
+    if ($auth->type eq "radius")
+    { my $hostname = $auth->hostname;
+      $hostname = $auth->port ? "$hostname:".$auth->port : $hostname;
+      my $radius = Authen::Radius->new(Host => $hostname, Secret => $auth->authkey);
+      my $result = $radius->check_pwd($username, $password);
+      return $result;
+    }
+    return 0;
+  }
+  return 0;
 }
 
 sub on_user_login

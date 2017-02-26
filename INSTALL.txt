@@ -22,6 +22,8 @@ Network Glue uses the following packages (and its dependencies)
 - Net::Cisco::ACS
 - Net::Intermapper
 - Net::Cisco::ISE
+- Authen::TacacsPlus
+- Authen::Radius
 
 For testing purposes, use Net::Cisco::ACS::Mock to mimick Cisco ACS.
 
@@ -41,6 +43,8 @@ Installation instructions:
 # cpanm Crypt::Rijndael
 # cpanm Digest::MD5
 # cpanm Parallel::ForkManager
+# cpanm Authen::TacacsPlus
+# cpanm Authen::Radius
 
 # apt-get install libdbd-pg-perl
 # apt-get install libxml-sax-expat-perl
@@ -84,7 +88,8 @@ Copy the schema below:
 CREATE TABLE accounts
 ( id integer,
   name character varying(64),
-  password character varying
+  password character varying,
+  authentication integer
 )
 WITH (
   OIDS=FALSE
@@ -253,6 +258,26 @@ WITH (
   OIDS=TRUE
 );
 ALTER TABLE ds_sources
+  OWNER TO ngpguser;
+
+-- Table: authentication
+
+-- DROP TABLE authentication
+
+drop table authentication
+
+CREATE TABLE authentication
+( id integer,
+  hostname character varying(256),
+  authkey character varying(256),
+  port character varying(6),
+  type character varying(8),
+  PRIMARY KEY (id) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE authentication
   OWNER TO ngpguser;
 
 REVOKE CONNECT ON DATABASE ng FROM PUBLIC;

@@ -135,6 +135,9 @@
                         <li>
                             <a href="/mappings/"><i class="fa fa-fw fa-tasks"></i> Mappings</a>
                         </li>
+                        <li>
+                            <a href="/authentication/"><i class="fa fa-fw fa-lock"></i> Authentication</a>
+                        </li>                        
                     </ul>
                 </li>
             </ul>
