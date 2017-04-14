@@ -1,0 +1,161 @@
+                % foreach my $uid (sort keys %{$account->{"acs"}}) {
+                                <div class="panel-footer">
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="acs_toggle_<%= $uid %>" value="1"<%= $acs_toggle->{$account->{"acs"}{$uid}{"source"}->id} %>></div>
+                                <input type="hidden" name="acs_uid" value="<%= $uid %>">
+                                <h5><a href="#" data-toggle="collapse" data-target="#acsattributes_<%= $uid %>" class="accordion-toggle">Cisco ACS Attributes&nbsp;</a> - <%= $account->{"acs"}{$uid}{"source"}->hostname %></h5>
+                                <div id="acsattributes_<%= $uid %>" class="collapse">
+                                <div class="form-group">
+                                    <label for="acsenabled" class="col-sm-4 control-label">Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="acs_enabled" name="acs_enabled_<%= $uid %>" value="1"<%= $account->{"acs"}{$uid}{"enabled"} %>>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acspassword" class="col-sm-4 control-label">Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" id="acs_password" name="acs_password_<%= $uid %>" placeholder="Password" value="PASSWORDHASBEENCHANGED!!">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" onclick="randomPassword('#acs_password')"><i class="fa fa-random" aria-hidden="true"></i></button>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+                                <div class="form-group">
+                                    <label for="acsdescription" class="col-sm-4 control-label">Description</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="acs_description" name="acs_description_<%= $uid %>" placeholder="Description" value="<%= $account->{"acs"}{$uid}{"description"} %>">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acsidentitygroup" class="col-sm-4 control-label">Identity Group</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="acs_identitygroupname" name="acs_identitygroupname_<%= $uid %>">
+                % foreach my $acsidgroup (sort keys %{$acsidgroups}) {                
+                                            <option value="<%= $acsidgroup %>"<%= $acsidgroups->{$acsidgroup}{"selected"} %>><%= $acsidgroups->{$acsidgroup}{"name"} %></option>
+% }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acsenablepassword" class="col-sm-4 control-label">Enable Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" name="acs_enablepassword_<%= $uid %>" id="acs_enablepassword" placeholder="Enable Password" value="PASSWORDHASBEENCHANGED!!">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="acspasswordneverexpires" class="col-sm-4 control-label">Password Never Expires</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="acs_passwordneverexpires" name="acs_passwordneverexpires_<%= $uid %>" value="1"<%= $account->{"acs"}{$uid}{"passwordneverexpires"} %>>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="acsdateexceedsenabled" class="col-sm-4 control-label">Expiration Date Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="acs_dateexceedsenabled" name="acs_dateexceedsenabled_<%= $uid %>" value="1"<%= $account->{"acs"}{$uid}{"dateexceedsenabled"} %>>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="acsdateexceeds" class="col-sm-4 control-label">Expiration Date</label>
+                                    <div class="input-group col-sm-8 input-group date">
+                                        <input type="text" class="form-control" id="acs_dateexceeds" name="acs_dateexceeds_<%= $uid %>" placeholder="01/01/2017" value="<%= $account->{"acs"}{$uid}{"dateexceeds"} %>"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="acspasswordtype" class="col-sm-4 control-label">Password Type</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="acs_passwordtype" name="acs_passwordtype_<%= $uid %>" placeholder="Internal" value="<%= $account->{"acs"}{$uid}{"passwordtype"} %>">
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+                                </div>
+                                </div> <!-- Cisco ACS Attributes Panel -->
+% }
+
+                % foreach my $uid (sort keys %{$account->{"stub_acs"}}) {
+                                <div class="panel-footer">
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="acs_toggle_<%= $uid %>" value="1"></div>
+                                <input type="hidden" name="acs_uid" value="<%= $uid %>">
+                                <h5><a href="#" data-toggle="collapse" data-target="#acsattributes_<%= $uid %>" class="accordion-toggle">Cisco ACS Attributes&nbsp;</a> - <%= $account->{"stub_acs"}{$uid}{"source"}->hostname %></h5>
+                                <div id="acsattributes_<%= $uid %>" class="collapse">
+                                <div class="form-group">
+                                    <label for="acsenabled" class="col-sm-4 control-label">Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="acs_enabled" name="acs_enabled_<%= $uid %>" value="1">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acspassword" class="col-sm-4 control-label">Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" id="acs_password" name="acs_password_<%= $uid %>" placeholder="Password" value="PASSWORDHASBEENCHANGED!!">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" onclick="randomPassword('#acs_password')"><i class="fa fa-random" aria-hidden="true"></i></button>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+                                <div class="form-group">
+                                    <label for="acsdescription" class="col-sm-4 control-label">Description</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="acs_description" name="acs_description_<%= $uid %>" placeholder="Description" value="">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acsidentitygroup" class="col-sm-4 control-label">Identity Group</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="acs_identitygroupname" name="acs_identitygroupname_<%= $uid %>">
+                % foreach my $acsidgroup (sort keys %{$acsidgroups}) {                
+                                            <option value="<%= $acsidgroup %>"<%= $acsidgroups->{$acsidgroup}{"selected"} %>><%= $acsidgroups->{$acsidgroup}{"name"} %></option>
+% }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acsenablepassword" class="col-sm-4 control-label">Enable Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" name="acs_enablepassword_<%= $uid %>" id="acs_enablepassword" placeholder="Enable Password" value="PASSWORDHASBEENCHANGED!!">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="acspasswordneverexpires" class="col-sm-4 control-label">Password Never Expires</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="acs_passwordneverexpires" name="acs_passwordneverexpires_<%= $uid %>" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="acsdateexceedsenabled" class="col-sm-4 control-label">Expiration Date Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="acs_dateexceedsenabled" name="acs_dateexceedsenabled_<%= $uid %>" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="acsdateexceeds" class="col-sm-4 control-label">Expiration Date</label>
+                                    <div class="input-group col-sm-8 input-group date">
+                                        <input type="text" class="form-control" id="acs_dateexceeds" name="acs_dateexceeds_<%= $uid %>" placeholder="01/01/2017" value=""><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="acspasswordtype" class="col-sm-4 control-label">Password Type</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="acs_passwordtype" name="acs_passwordtype_<%= $uid %>" placeholder="Internal" value="">
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+                                </div>
+                                </div> <!-- Cisco ACS Attributes Panel -->
+% }

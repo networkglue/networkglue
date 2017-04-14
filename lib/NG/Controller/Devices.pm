@@ -8,19 +8,15 @@ for (1..100)
   $devices->{$_}{"ise"} = $_ % 2 ? 0 : 1;
 }
 
-     my $items = { "acs" => "ACS",
-                   "ise" => "ISE",
-                   "intermapper" => "Intermapper",
-                   #"hpna" => "HP NA",
-                   #"cacti" => "Cacti",
-                   #"ldap" => "LDAP",
-                   #"ad" => "AD",
-                   #"nagios" => "Nagios",
-                };
-
 sub new_form { # GET /devices/new - form to create a device   
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');
+  my $filter = "";
+  $self->stash(filter => $filter);
+  $self->stash(items => $self->items);  
+  my $username = $self->session('username');
+  $self->stash(username => $username);
+
   $self->render('devices/create', layout => 'accounts');
 }
 
@@ -30,6 +26,16 @@ sub show { # GET /devices/123 - show device with id 123
   $self->redirect_to('/login/') if !$self->session('logged_in');
   my $id = $self->param("id");
   my $device = $devices->{$id};
+
+  my $filterheader = "";  
+  my $filter = $self->param('filter');
+  $self->stash(items => $self->items);
+  $self->stash(filterheader => $filterheader);
+  $filter = "?filter=$filter" if $filter;
+  $self->stash(filter => $filter);
+  my $username = $self->session('username');
+  $self->stash(username => $username);
+
   $self->stash(device => $device);
   $self->render('devices/detail', layout => 'devices');
 }
@@ -59,11 +65,14 @@ sub index { # GET /devices - list of all devices
     my %filterdevices = ();
     @filterdevices{@keys} = @devices{@keys};
     $self->stash(devices => \%filterdevices);
-    $filterheader = "$items->{$filter} Devices - ";
+    $filterheader = "$self->items->{$filter} Devices - ";
   } else
   {  $self->stash(devices => $devices); }
-  $self->stash(items => $items);
+  $self->stash(items => $self->items);
   $self->stash(filterheader => $filterheader);  
+  my $username = $self->session('username');
+  $self->stash(username => $username);
+
   $self->render('devices/index', layout => 'devices');
 }
 

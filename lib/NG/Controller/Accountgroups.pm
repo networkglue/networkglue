@@ -5,15 +5,10 @@ use Net::Cisco::ACS::User;
 use Net::Cisco::ISE::InternalUser;
 use Net::Intermapper::User;
 
-     my $items = { "acs" => "ACS",
-                   "ise" => "ISE",
-                   "intermapper" => "Intermapper",
-                   #"hpna" => "HP NA",
-                   #"cacti" => "Cacti",
-                   #"ldap" => "LDAP",
-                   #"ad" => "AD",
-                   #"nagios" => "Nagios",
-                };
+my $items = { "acs" => "ACS",
+              "ise" => "ISE",
+              "intermapper" => "Intermapper",
+             };
 
 my $accountgroups = {};
 my $acsaccountgroups = {};
@@ -32,6 +27,9 @@ sub new_form { # GET /accountgroups/new - form to create an accountgroup
   my $filter = "";
   $self->stash(filter => $filter);
   $self->stash(items => $items);  
+  my $username = $self->session('username');
+  $self->stash(username => $username);
+
   $self->render('accountgroups/create', layout => 'accountgroups');
 }
 
@@ -53,6 +51,8 @@ sub show { # GET /accountgroups/123 - show account group with id 123
   $self->stash(acs_toggle => $acs_toggle);
   $self->stash(ise_toggle => $ise_toggle);
   $self->stash(im_toggle => $im_toggle);
+  my $username = $self->session('username');
+  $self->stash(username => $username);
 
   $self->stash(items => $items);
   $self->stash(filterheader => $filterheader);
@@ -87,6 +87,9 @@ sub index { # GET /accountgroups - list of all accountgroups
     $filterheader = "$items->{$filter} Account Group - ";
   } else
   {  $self->stash(accountgroups => $accountgroups); }
+  my $username = $self->session('username');
+  $self->stash(username => $username);
+
   $self->stash(items => $items);
   $self->stash(filterheader => $filterheader);
   $filter = "?filter=$filter" if $filter;
@@ -260,12 +263,12 @@ sub update { # PUT /accountgroups/123 - update an account group
   # No IM group exists, needs to be created.
   if (!$intermapper_id && $im_toggle)  
   {  $self->db->resultset('DsIntermapperUser')->create(
-    { groups => $name, external => "false", guest => "false",
+    { id => $immaxid , groups => $name, external => "false", guest => "false",
       name => "_____dummy".(int(rand(999999))), password => "randomizedstring",
       status => $status_created
       # TODO: CLEANUP!
     });
-    $self->app->log->debug("Create $intermapper_id - $im_toggle");
+    #$self->app->log->debug("Create $intermapper_id - $im_toggle");
   }
   
   # IM group exists, has to be deleted
@@ -284,7 +287,7 @@ sub update { # PUT /accountgroups/123 - update an account group
     }
     delete($intermapperaccountgroups->{$id});
     $accountgroups->{$id}{"intermapper"} = 0;
-    $self->app->log->debug("Delete $intermapper_id - $im_toggle");    
+    #$self->app->log->debug("Delete $intermapper_id - $im_toggle");    
   }
 
   $self->consolidate();

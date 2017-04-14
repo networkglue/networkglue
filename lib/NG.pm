@@ -17,18 +17,27 @@ sub startup {
   my $schema = NG::Schema->connect("dbi:Pg:dbname=ng; host=localhost","ngpguser","ngpgpassword");
   $self->helper(db => sub { return $schema; });
   $self->helper(key => sub { return "Some Secret Key. Happy Happy Joy" }); # 32 bytes is the required key size
-  $self->helper(salt => sub { return "ThisSaltKeyMayChange!?!?1234567890" }); # Salt value
+  $self->helper(salt => sub { return "ThisSaltKeyMayChange____1234567890" }); # Salt value
   
   my $cipher = Crypt::CBC->new( -cipher => 'Rijndael', -key => $self->key );
   $self->helper(cipher => sub { return $cipher; });
   
   $self->helper("datasources" => sub
                 { my %datasources = ();
-                  $datasources{"acs"} = Net::Cisco::ACS->new(hostname => '10.0.0.1', username => 'acsadmin', password => 'testPassword', mock => "1") unless $datasources{"acs"};
-                  $datasources{"ise"} = Net::Cisco::ISE->new(hostname => '10.0.0.1', username => 'acsadmin', password => 'testPassword', mock => "1") unless $datasources{"ise"};
-                  $datasources{"intermapper"} = Net::Intermapper->new(hostname => '10.0.0.1', username => 'acsadmin', password => 'testPassword', mock => "1") unless $datasources{"intermapper"};
-                  #$datasources{"hpna"} = Net::HP::NA->new(hostname => '10.0.0.1', username => 'admin', password => 'testPassword', mock => "1") unless $datasources{"hpna"};                  
+                  my %sources = %{ $self->sources() };
+                  for my $source (keys %sources)
+                  { if ($sources{$source}->type->shortname eq "ACS") 
+                    { $datasources{$sources{$source}->id} = Net::Cisco::ACS->new(hostname => $sources{$source}->hostname, username => $sources{$source}->username, password => $sources{$source}->password, ssl => $sources{$source}->ssl); }
+                    if ($sources{$source}->type->shortname eq "Intermapper") 
+                    { $datasources{$sources{$source}->id} =  Net::Intermapper->new(hostname => $sources{$source}->hostname, username => $sources{$source}->username, password => $sources{$source}->password, ssl => $sources{$source}->ssl); }
+                    if ($sources{$source}->type->shortname eq "ISE") 
+                    { $datasources{$sources{$source}->id} = Net::Cisco::ISE->new(hostname => $sources{$source}->hostname, username => $sources{$source}->username, password => $sources{$source}->password, ssl => $sources{$source}->ssl, debug => 0); }
+                  }
                   return %datasources;
+                });
+  
+  $self->helper("items" => sub
+                { $self->sources();
                 });
   
   $self->secrets(['This is the new session key for NG', 'This key is only for Validation - Not sure what that means']);
@@ -46,6 +55,7 @@ sub startup {
   
   $self->resources('datasources');
   $self->resources('devices');
+  $self->resources('devicegroups');  
   $self->resources('accountgroups');
   $self->resources('accounts');
   $self->resources('mappings'); 
@@ -65,6 +75,19 @@ sub startup {
 
   $r->get('/check')->to('login#check');
 
+}
+
+sub sources { 
+  my $self = shift;
+  my $sources_rs = $self->db->resultset('DsSource');
+  my $query_rs = $sources_rs->search;
+  my $sources = {};
+
+  while (my $source = $query_rs->next)
+  { $sources->{$source->type->shortname} = $source;
+  }
+  $self->app->log->debug(keys %{ $sources });
+  return $sources;
 }
 
 1;

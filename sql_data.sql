@@ -26,7 +26,7 @@ insert into mappings(source_ds, source_table, source_field, destination_ds, dest
 insert into ds_types (id, shortname, name) values (1, 'ACS', 'Cisco ACS 5.x');
 insert into ds_types (id, shortname, name) values (2, 'Intermapper', 'HelpSystems Intermapper 5.x/6.x');
 insert into ds_types (id, shortname, name) values (3, 'ISE', 'Cisco ISE 2.x');
-insert into ds_types(id,shortname,name) values (4,'HPNA','HP Network Automation 10.x');
+insert into ds_types (id, shortname, name) values (4, 'HPNA', 'HP Network Automation 10.x');
 
 insert into ds_tables (id, type, coretable, name, tablepk) values (1, 1, 'accounts', 'users', 'name');
 insert into ds_tables (id, type, coretable, name, tablepk) values (2, 2, 'accounts', 'users', 'name');

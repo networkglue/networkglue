@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Network Glue - Data Source Setup</title>
+    <title>Network Glue - Account Groups</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
@@ -39,12 +39,6 @@
     <!-- DataTable Core JavaScript -->
     <script src="/js/jquery.dataTables.min.js"></script>
     <script src="/js/dataTables.buttons.min.js"></script>
-    <script src="/js/buttons.flash.min.js"></script>
-    <script src="/js/pdfmake.min.js"></script>
-    <script src="/js/vfs_fonts.js"></script>
-    <script src="/js/buttons.html5.min.js"></script>
-    <script src="/js/buttons.print.min.js"></script>
-    <script src="/js/jszip.min.js"></script>
     <script src="/js/dataTables.colReorder.min.js"></script>
     <script src="/js/dataTables.select.min.js"></script>
 
@@ -88,9 +82,6 @@
             colReorder: true,
             responsive: true,
             pageLength: 50,
-                buttons: [
-                    'copyHtml5','excelHtml5','csvHtml5','pdfHtml5'
-                ],
             columnDefs: [ {
             orderable: false,
             className: 'select-checkbox',
@@ -220,7 +211,7 @@
                     </ul>
                 </li>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> John Smith <b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>&nbsp;<%= $username %><b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
                             <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
@@ -283,62 +274,11 @@
                             <li>
                                 <a href="/devices/">All Devices</a>
                             </li>
+                % foreach my $item (sort keys %{$items}) {                
                             <li>
-                                <a href="#">ACS Devices</a>
+                                <a href="/devices?filter=<%= $item %>"><%= $items->{$item} %> Devices</a>
                             </li>
-                            <li>
-                                <a href="#">ISE Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">Intermapper Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">HP NA Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">Cacti Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">LDAP Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">AD Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">Nagios Devices</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="javascript:;" data-toggle="collapse" data-target="#devicegroupsmenu"><i class="fa fa-fw fa-tasks"></i> Device Groups <i class="fa fa-fw fa-caret-down"></i></a>
-                        <ul id="devicegroupsmenu" class="collapse">
-                            <li>
-                                <a href="#">All Device Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">ACS Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">ISE Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Intermapper Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">HP NA Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Cacti Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">LDAP Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">AD Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Nagios Groups</a>
-                            </li>
+% }
                         </ul>
                     </li>
                 </ul>

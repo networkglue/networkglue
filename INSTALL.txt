@@ -29,6 +29,11 @@ For testing purposes, use Net::Cisco::ACS::Mock to mimick Cisco ACS.
 
 cpanm https://github.com/beatnik/NetCiscoAcsMock/tarball/master
 
+For testing purposes, use Net::Cisco::ISE::Mock to mimick Cisco ISE.
+
+cpanm https://github.com/beatnik/NetCiscoIseMock/tarball/master
+
+
 Installation instructions:
 (On a clean Ubuntu)
 
@@ -84,9 +89,13 @@ Define the password for ngpguser here (or use a different user account)
 
 Copy the schema below:
 
+create database ng;
+
+\c ng
 
 CREATE TABLE accounts
-( id integer,
+( uid character varying(16),
+  id integer,
   name character varying(64),
   password character varying,
   authentication integer
@@ -98,125 +107,14 @@ ALTER TABLE accounts
   OWNER TO ngpguser;
 
 CREATE TABLE accountgroups
-( id integer,
+( uid character varying(16),
+  id integer,
   name character varying(64)
 )
 WITH (
   OIDS=FALSE
 );
 ALTER TABLE accountgroups
-  OWNER TO ngpguser;
-
-CREATE TABLE ds_acs_identitygroups
-( id integer,
-  name character varying(64),
-  description character varying(128),
-  status integer,
-  checksum character varying(64),
-  PRIMARY KEY (id) 
-)
-WITH (
-  OIDS=TRUE
-);
-ALTER TABLE ds_acs_identitygroups
-  OWNER TO ngpguser;
-
-CREATE TABLE ds_acs_users
-( id integer,
-  name character varying(64),
-  password character varying,
-  enablePassword character varying,
-  description character varying(64),
-  identityGroupName integer REFERENCES ds_acs_identitygroups(id),
-  enabled bool,
-  passwordNeverExpires bool,
-  passwordType character varying(64),
-  dateExceeds character varying(16),
-  dateExceedsEnabled bool,
-  status integer,
-  checksum character varying(64),
-  created character varying(32),
-  lastmodified character varying(32),
-  PRIMARY KEY (id)
-)
-WITH (
-  OIDS=TRUE
-);
-ALTER TABLE ds_acs_users
-  OWNER TO ngpguser;
-
-CREATE TABLE ds_ise_identitygroup
-( id character varying(128),
-  name character varying(64),
-  description character varying(128),
-  status integer,
-  checksum character varying(64),
-  PRIMARY KEY (id) 
-)
-WITH (
-  OIDS=TRUE
-);
-ALTER TABLE ds_ise_identitygroup
-  OWNER TO ngpguser;
-
-CREATE TABLE ds_ise_internalusers
-( id character varying(64),
-  name character varying(64),
-  password character varying,
-  email character varying(128),
-  firstName character varying(64),
-  lastName character varying(64),
-  identityGroups character varying(128) REFERENCES ds_ise_identitygroup(id),
-  changePassword bool,
-  expiryDateEnabled bool,
-  expiryDate character varying(16),
-  enablePassword character varying,
-  enabled bool,
-  passwordIDStore character varying(64),
-  status integer,
-  checksum character varying(64),
-  PRIMARY KEY (id) 
-)
-WITH (
-  OIDS=TRUE
-);
-ALTER TABLE ds_ise_internalusers
-  OWNER TO ngpguser;
-
-CREATE TABLE ds_intermapper_users
-( id character varying(64),
-  name character varying(64),
-  password character varying,
-  groups character varying(128),
-  external bool,
-  enabled bool,
-  guest character varying(64),
-  status integer,
-  checksum character varying(64),
-  PRIMARY KEY (id) 
-)
-WITH (
-  OIDS=TRUE
-);
-ALTER TABLE ds_intermapper_users
-  OWNER TO ngpguser;
-
-CREATE TABLE mappings
-( source_ds integer,
-  source_table character varying(128),
-  source_field character varying(128),
-  destination_ds integer,
-  destination_table character varying(128),
-  destination_field character varying(128),
-  overwriteflag bool,
-  appendflag bool,
-  createflag bool,
-  PRIMARY KEY (id) 
-)
-WITH (
-  OIDS=TRUE
-);
-ALTER TABLE mappings
   OWNER TO ngpguser;
 
 CREATE TABLE ds_types
@@ -251,6 +149,7 @@ CREATE TABLE ds_sources
   hostname character varying(256),
   username character varying(64),
   password character varying(64),
+  ssl integer, 
   priority integer,
   PRIMARY KEY (id) 
 )
@@ -260,11 +159,127 @@ WITH (
 ALTER TABLE ds_sources
   OWNER TO ngpguser;
 
--- Table: authentication
+CREATE TABLE ds_acs_identitygroups
+( uid character varying(16),
+  id integer,
+  source integer REFERENCES ds_sources(id),
+  name character varying(64),
+  description character varying(128),
+  status integer,
+  checksum character varying(64),
+  PRIMARY KEY (uid) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_acs_identitygroups
+  OWNER TO ngpguser;
 
--- DROP TABLE authentication
+CREATE TABLE ds_acs_users
+( uid character varying(16),
+  id integer,
+  source integer REFERENCES ds_sources(id),
+  name character varying(64),
+  password character varying,
+  enablePassword character varying,
+  description character varying(64),
+  identityGroupName character varying(16) REFERENCES ds_acs_identitygroups(uid),
+  enabled bool,
+  passwordNeverExpires bool,
+  passwordType character varying(64),
+  dateExceeds character varying(16),
+  dateExceedsEnabled bool,
+  status integer,
+  checksum character varying(64),
+  created character varying(32),
+  lastmodified character varying(32),
+  PRIMARY KEY (uid)
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_acs_users
+  OWNER TO ngpguser;
 
-drop table authentication
+CREATE TABLE ds_ise_identitygroup
+( uid character varying(140),
+  id character varying(128),
+  source integer REFERENCES ds_sources(id),
+  name character varying(64),
+  description character varying(128),
+  status integer,
+  checksum character varying(64),
+  PRIMARY KEY (uid) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_ise_identitygroup
+  OWNER TO ngpguser;
+
+CREATE TABLE ds_ise_internalusers
+( uid character varying(72),
+  id character varying(64),
+  source integer REFERENCES ds_sources(id),
+  name character varying(64),
+  password character varying,
+  email character varying(128),
+  firstName character varying(64),
+  lastName character varying(64),
+  identityGroups character varying(140) REFERENCES ds_ise_identitygroup(uid),
+  changePassword bool,
+  expiryDateEnabled bool,
+  expiryDate character varying(16),
+  enablePassword character varying,
+  enabled bool,
+  passwordIDStore character varying(64),
+  status integer,
+  checksum character varying(64),
+  PRIMARY KEY (uid) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_ise_internalusers
+  OWNER TO ngpguser;
+
+CREATE TABLE ds_intermapper_users
+( uid character varying(72),
+  id character varying(64),
+  source integer REFERENCES ds_sources(id),
+  name character varying(64),
+  password character varying,
+  groups character varying(128),
+  external bool,
+  guest character varying(64),
+  status integer,
+  checksum character varying(64),
+  PRIMARY KEY (uid) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_intermapper_users
+  OWNER TO ngpguser;
+
+CREATE TABLE mappings
+( id integer,
+  source_ds integer,
+  source_table character varying(128),
+  source_field character varying(128),
+  destination_ds integer,
+  destination_table character varying(128),
+  destination_field character varying(128),
+  overwriteflag bool,
+  appendflag bool,
+  createflag bool,
+  PRIMARY KEY (id) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE mappings
+  OWNER TO ngpguser;
 
 CREATE TABLE authentication
 ( id integer,

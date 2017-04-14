@@ -22,13 +22,16 @@
                                 <div class="form-group">
                                     <label for="hostname" class="col-sm-4 control-label">Name</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" name="name" id="name" placeholder="name">
+                                        <input type="text" class="form-control" name="name" id="name" placeholder="name" required="true">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="hostname" class="col-sm-4 control-label">Password</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="password" class="form-control" id="password" name="password" placeholder="password">
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="password" required="true">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" onclick="randomPassword('#password')"><i class="fa fa-random" aria-hidden="true"></i></button>
+                                        </span>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -44,216 +47,15 @@
                                 <div class="clearfix"></div>
                                 </div>
 
-                                <div class="panel-footer">
-                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="acs_toggle" value="1"></div>
-                                <h5><a href="#" data-toggle="collapse" data-target="#acsattributes">Cisco ACS Attributes</a></h5>
-                                <div id="acsattributes" class="collapse">
-                                <div class="form-group">
-                                    <label for="acsenabled" class="col-sm-4 control-label">Enabled</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="enabled" name="acs_enabled" value="1">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="acspassword" class="col-sm-4 control-label">Password</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="password" class="form-control" id="acspassword" name="acspassword" placeholder="Password">
-                                    </div>
-                                </div>                                
-                                <div class="clearfix"></div>
-                                <div class="form-group">
-                                    <label for="acsdescription" class="col-sm-4 control-label">Description</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="acsdescription" name="acs_description" placeholder="Description">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="acsidentitygroup" class="col-sm-4 control-label">Identity Group</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="acsidentitygroupname" name="acs_identitygroupname" placeholder="Identity Group Name">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="acsidentitygroup" class="col-sm-4 control-label">Identity Group</label>
-                                    <div class="input-group col-sm-8">
-                                        <select class="form-control" id="acsidentitygroupname" name="acs_identitygroupname">
-                % foreach my $acsidgroup (sort keys %{$acsidgroups}) {                
-                                            <option value="$acsidgroup"><%= $acsidgroups->{$acsidgroup} %></option>
+% if ($items->{"ACS"}) {
+  %= include 'accounts/create_acs'
 % }
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="acsenablepassword" class="col-sm-4 control-label">Enable Password</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="password" class="form-control" name="acs_enablepassword" id="acsenablepassword" placeholder="Enable Password">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="acspasswordneverexpires" class="col-sm-4 control-label">Password Never Expires</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="passwordneverexpires" name="acs_passwordneverexpires" value="1">
-                                    </div>
-                                </div>
-                                <div class="clearfix"></div>
-
-                                <div class="form-group">
-                                    <label for="acsdateexceedsenabled" class="col-sm-4 control-label">Expiration Date Enabled</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="dateexceedsenabled" name="acs_dateexceedsenabled" value="1">
-                                    </div>
-                                </div>
-                                <div class="clearfix"></div>
-
-                                <div class="form-group">
-                                    <label for="acsdateexceeds" class="col-sm-4 control-label">Expiration Date</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="acsdateexceeds" name="acs_dateexceeds" placeholder="01/01/2017">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="acspasswordtype" class="col-sm-4 control-label">Password Type</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="acspasswordtype" name="acs_passwordtype" placeholder="Internal">
-                                    </div>
-                                </div>
-
-                                <div class="clearfix"></div>
-                                </div>
-                                </div> <!-- Cisco ACS Attributes Panel -->
-
-                                <div class="panel-footer">
-                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="ise_toggle" value="1"></div>                                    
-                                <h5><a href="#" data-toggle="collapse" data-target="#iseattributes">Cisco ISE Attributes</a></h5>
-                                <div id="iseattributes" class="collapse">
-
-                                <div class="form-group">
-                                    <label for="iseenabled" class="col-sm-4 control-label">Enabled</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="enabled" name="ise_enabled" value="1">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="isepassword" class="col-sm-4 control-label">Password</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="password" class="form-control" id="isepassword" name="isepassword" placeholder="Password">
-                                    </div>
-                                </div>
-                                
-                                <div class="clearfix"></div>
-                                <div class="form-group">
-                                    <label for="isefirstname" class="col-sm-4 control-label">First Name</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="isefirstname" name="ise_firstname" placeholder="First Name">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="iselastname" class="col-sm-4 control-label">Last Name</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="iselastname" name="ise_lastname" placeholder="Last Name">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="iseidentitygroups" class="col-sm-4 control-label">Identity Groups</label>
-                                    <div class="input-group col-sm-8">
-
-                                        <select class="form-control" id="iseidentitygroups" name="ise_identitygroups">
-                % foreach my $iseidgroup (sort keys %{$iseidgroups}) {                
-                                            <option value="$iseidgroup"><%= $iseidgroups->{$iseidgroup} %></option>
+% if ($items->{"ISE"}) {
+  %= include 'accounts/create_ise'
 % }
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="iseemail" class="col-sm-4 control-label">E-Mail</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="iseemail" name="ise_email" placeholder="E-Mail">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="iseenablepassword" class="col-sm-4 control-label">Enable Password</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="password" class="form-control" name="ise_enablepassword" id="iseenablepassword" placeholder="Enable Password">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="isechangepassword" class="col-sm-4 control-label">Change Password</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="isechangepassword" name="ise_changepassword" value="1">
-                                    </div>
-                                </div>
-                                <div class="clearfix"></div>
-
-                                <div class="form-group">
-                                    <label for="iseexpiryDateEnabled" class="col-sm-4 control-label">Expiration Date Enabled</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="iseexpirydateenabled" name="ise_expirydateenabled" value="1">
-                                    </div>
-                                </div>
-                                <div class="clearfix"></div>
-
-                                <div class="form-group">
-                                    <label for="iseexpirydate" class="col-sm-4 control-label">Expiration Date</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="iseexpirydate" name="ise_expirydate" placeholder="01/01/2017">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="isepasswordidstore" class="col-sm-4 control-label">Password ID Store</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="isepasswordidstore" name="ise_passwordidstore" placeholder="Internal">
-                                    </div>
-                                </div>
-
-                                <div class="clearfix"></div>
-                                </div>
-                                </div> <!-- Cisco ISE Attributes Panel -->
-
-                                <div class="panel-footer">
-                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="im_toggle" value="1"></div>
-                                <h5><a href="#" data-toggle="collapse" data-target="#intermapperattributes">Intermapper Attributes</a></h5>
-                                <div id="intermapperattributes" class="collapse">
-
-                                <div class="form-group">
-                                    <label for="intermappergroups" class="col-sm-4 control-label">Groups</label>
-                                    <div class="input-group col-sm-8">
-                                        <select class="form-control" id="intermappergroups" name="intermapper_groups">
-                % foreach my $imidgroup (sort keys %{$imidgroups}) {                
-                                            <option value="<%= $imidgroup %>"><%= $imidgroups->{$imidgroup}{"name"} %></option>
+% if ($items->{"Intermapper"}) {
+  %= include 'accounts/create_intermapper'
 % }
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="intermapperpassword" class="col-sm-4 control-label">Password</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="password" class="form-control" name="intermapper_password" id="intermapperpassword" placeholder="Password">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="intermapperexternal" class="col-sm-4 control-label">External</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="intermapperexternal" name="intermapper_external" value="1">
-                                    </div>
-                                </div>
-                                <div class="clearfix"></div>
-
-                                <div class="form-group">
-                                    <label for="intermapperguest" class="col-sm-4 control-label">Guest</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="intermapperguest" name="intermapper_guest" placeholder="Guest Login">
-                                    </div>
-                                </div>
-
-                                </div>
-                                </div> <!-- Cisco ISE Attributes Panel -->
-
-
                                 <div class="panel-footer">                                
                                 <div class="form-group">
                                   <div class="col-sm-12">

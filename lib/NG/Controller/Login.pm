@@ -100,10 +100,14 @@ sub on_user_login
       $self->session(username => $username);
       $self->redirect_to('/accounts/');
     } else
-    { $self->render(text => 'Wrong username/password', status => 403); # Provide template here!!
+    { #$self->render(text => 'Wrong username/password', status => 403); # Provide template here!!
+      my $message = qq(<div class="alert alert-danger">Wrong username or password!</div>);
+      $self->stash(message => $message);
+      $self->render('login/index');
     }
   } else
-  { $self->render('login/index');
+  { $self->stash(message => "");
+    $self->render('login/index');
   }
 }
 

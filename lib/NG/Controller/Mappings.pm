@@ -16,6 +16,15 @@ sub show { # GET /mappings/123 - show mapping with id 123
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');
   my $id = $self->param("id");
+
+  my $filter = "";
+  my $filterheader = "";
+  $self->stash(items => $self->items);
+  $self->stash(filterheader => $filterheader);
+  $self->stash(filter => $filter);
+  my $username = $self->session('username');
+  $self->stash(username => $username);
+
   $self->render('mappings/detail', layout => 'mappings');
 }
 
@@ -41,8 +50,16 @@ sub index { # GET /mappings - list of all mappings
     $mappings->{$mapping->id}{"destination_table"} = $mapping->destination_table if $mapping->destination_table;
     $mappings->{$mapping->id}{"destination_field"} = $mapping->destination_field if $mapping->destination_field;
 
-    $self->app->log->debug(Dumper \$mapping->source_table);
+    #$self->app->log->debug(Dumper \$mapping->source_table);
   }
+
+  my $filter = "";
+  my $filterheader = "";
+  $self->stash(items => $self->items);
+  $self->stash(filterheader => $filterheader);
+  $self->stash(filter => $filter);
+  my $username = $self->session('username');
+  $self->stash(username => $username);
   
   $self->stash(mappings => $mappings);
   $self->render('mappings/index', layout => 'mappings');
@@ -52,7 +69,13 @@ sub new_form { # GET /mappings/new - form to create a mappings
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');
   my $filter = "";
+  my $filterheader = "";
+  $self->stash(items => $self->items);
+  $self->stash(filterheader => $filterheader);
   $self->stash(filter => $filter);
+  my $username = $self->session('username');
+  $self->stash(username => $username);
+
   $self->render('mappings/create', layout => 'mappings');
 }
 

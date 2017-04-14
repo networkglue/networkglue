@@ -1,0 +1,93 @@
+                % foreach my $uid (sort keys %{$account->{"im"}}) {
+                                <div class="panel-footer">
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="im_toggle_<%= $uid %>" value="1"<%= $ise_toggle->{$account->{"im"}{$uid}{"source"}->id} %>></div>
+                                <h5><a href="#" data-toggle="collapse"  class="accordion-toggle" data-target="#intermapperattributes_<%= $uid %>">Intermapper Attributes&nbsp;</a> - <%= $account->{"im"}{$uid}{"source"}->hostname %></h5>
+                                <div id="intermapperattributes_<%= $uid %>" class="collapse">
+                                <input type="hidden" name="im_uid" value="<%= $uid %>">
+                                <div class="form-group">
+                                    <label for="impassword" class="col-sm-4 control-label">Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" id="intermapper_password" name="intermapper_password_<%= $uid %>" placeholder="Password" value="PASSWORDHASBEENCHANGED!!">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" onclick="randomPassword('#intermapper_password')"><i class="fa fa-random" aria-hidden="true"></i></button>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="intermappergroups" class="col-sm-4 control-label">Groups</label>
+
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="intermapper_groups" name="intermapper_groups_<%= $uid %>">
+                % foreach my $imidgroup (sort keys %{$imidgroups}) {                
+                                            <option value="<%= $imidgroup %>"<%= $imidgroups->{$imidgroup}{"selected"} %>><%= $imidgroups->{$imidgroup}{"name"} %></option>
+% }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="intermapperexternal" class="col-sm-4 control-label">External</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="intermapper_external" name="intermapper_external_<%= $uid %>" value="1"<%= $account->{"im"}{$uid}{"external"} %>>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="intermapperguest" class="col-sm-4 control-label">Guest</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="intermapper_guest" name="intermapper_guest_<%= $uid %>" placeholder="Guest Login" value="<%= $account->{"im"}{$uid}{"guest"} %>">
+                                    </div>
+                                </div>
+
+                                </div>
+                                </div> <!-- Intermapper Attributes Panel -->
+% }
+
+                % foreach my $uid (sort keys %{$account->{"stub_intermapper"}}) {
+                                <div class="panel-footer">
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="im_toggle_<%= $uid %>" value="1"></div>
+                                <h5><a href="#" data-toggle="collapse"  class="accordion-toggle" data-target="#intermapperattributes_<%= $uid %>">Intermapper Attributes&nbsp;</a> - <%= $account->{"stub_im"}{$uid}{"source"}->hostname %></h5>
+                                <div id="intermapperattributes<%= $uid %>" class="collapse">
+                                <input type="hidden" name="im_uid" value="<%= $uid %>">
+                                <div class="form-group">
+                                    <label for="impassword" class="col-sm-4 control-label">Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" id="intermapper_password" name="intermapper_password_<%= $uid %>" placeholder="Password" value="PASSWORDHASBEENCHANGED!!">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" onclick="randomPassword('#intermapper_password')"><i class="fa fa-random" aria-hidden="true"></i></button>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="intermappergroups" class="col-sm-4 control-label">Groups</label>
+
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="intermapper_groups" name="intermapper_groups_<%= $uid %>">
+                % foreach my $imidgroup (sort keys %{$imidgroups}) {                
+                                            <option value="<%= $imidgroup %>"<%= $imidgroups->{$imidgroup}{"selected"} %>><%= $imidgroups->{$imidgroup}{"name"} %></option>
+% }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="intermapperexternal" class="col-sm-4 control-label">External</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="intermapper_external" name="intermapper_external_<%= $uid %>" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="intermapperguest" class="col-sm-4 control-label">Guest</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="intermapper_guest" name="intermapper_guest_<%= $uid %>" placeholder="Guest Login" value="">
+                                    </div>
+                                </div>
+
+                                </div>
+                                </div> <!-- Intermapper Attributes Panel -->
+% }

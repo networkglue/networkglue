@@ -35,12 +35,11 @@ __PACKAGE__->table("accountgroups");
 
 =head1 ACCESSORS
 
-=head2 pk_id
+=head2 uid
 
-  data_type: 'integer'
-  is_auto_increment: 1
-  is_nullable: 0
-  sequence: 'accountgroups_pk_id_seq'
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 16
 
 =head2 id
 
@@ -56,13 +55,8 @@ __PACKAGE__->table("accountgroups");
 =cut
 
 __PACKAGE__->add_columns(
-  "pk_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "accountgroups_pk_id_seq",
-  },
+  "uid",
+  { data_type => "varchar", is_nullable => 1, size => 16 },
   "id",
   { data_type => "integer", is_nullable => 1 },
   "name",
@@ -70,8 +64,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07046 @ 2016-12-29 16:46:43
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:uxuwqbWgbVOGrI22/X7PDw
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-04-01 00:33:40
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JRBPmrdTK1owAlN5nZ7Uug
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

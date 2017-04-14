@@ -64,6 +64,11 @@ __PACKAGE__->table("ds_sources");
   is_nullable: 1
   size: 64
 
+=head2 ssl
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =head2 priority
 
   data_type: 'integer'
@@ -82,6 +87,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "password",
   { data_type => "varchar", is_nullable => 1, size => 64 },
+  "ssl",
+  { data_type => "integer", is_nullable => 1 },
   "priority",
   { data_type => "integer", is_nullable => 1 },
 );
@@ -99,6 +106,81 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
+
+=head2 ds_acs_identitygroups
+
+Type: has_many
+
+Related object: L<NG::Schema::Result::DsAcsIdentitygroup>
+
+=cut
+
+__PACKAGE__->has_many(
+  "ds_acs_identitygroups",
+  "NG::Schema::Result::DsAcsIdentitygroup",
+  { "foreign.source" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 ds_acs_users
+
+Type: has_many
+
+Related object: L<NG::Schema::Result::DsAcsUser>
+
+=cut
+
+__PACKAGE__->has_many(
+  "ds_acs_users",
+  "NG::Schema::Result::DsAcsUser",
+  { "foreign.source" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 ds_intermapper_users
+
+Type: has_many
+
+Related object: L<NG::Schema::Result::DsIntermapperUser>
+
+=cut
+
+__PACKAGE__->has_many(
+  "ds_intermapper_users",
+  "NG::Schema::Result::DsIntermapperUser",
+  { "foreign.source" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 ds_ise_identitygroups
+
+Type: has_many
+
+Related object: L<NG::Schema::Result::DsIseIdentitygroup>
+
+=cut
+
+__PACKAGE__->has_many(
+  "ds_ise_identitygroups",
+  "NG::Schema::Result::DsIseIdentitygroup",
+  { "foreign.source" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 ds_ise_internalusers
+
+Type: has_many
+
+Related object: L<NG::Schema::Result::DsIseInternaluser>
+
+=cut
+
+__PACKAGE__->has_many(
+  "ds_ise_internalusers",
+  "NG::Schema::Result::DsIseInternaluser",
+  { "foreign.source" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
 
 =head2 type
 
@@ -121,8 +203,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-02-05 13:49:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FsuuMvAQAwX7aIsGv9qk1Q
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-03-25 23:41:02
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RQGoUHMbZzNmUzcPt70YuA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

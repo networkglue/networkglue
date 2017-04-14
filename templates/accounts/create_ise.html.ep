@@ -1,0 +1,95 @@
+                                <div class="panel-footer">
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="ise_toggle" value="1"></div>                                    
+                                <h5><a href="#" data-toggle="collapse" data-target="#iseattributes">Cisco ISE Attributes</a></h5>
+                                <div id="iseattributes" class="collapse">
+
+                                <div class="form-group">
+                                    <label for="iseenabled" class="col-sm-4 control-label">Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="ise_enabled" name="ise_enabled" value="1">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="isepassword" class="col-sm-4 control-label">Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" id="ise_password" name="ise_password" placeholder="Password">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" onclick="randomPassword('#ise_password')"><i class="fa fa-random" aria-hidden="true"></i></button>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="clearfix"></div>
+                                <div class="form-group">
+                                    <label for="isefirstname" class="col-sm-4 control-label">First Name</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="ise_firstname" name="ise_firstname" placeholder="First Name">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="iselastname" class="col-sm-4 control-label">Last Name</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="ise_lastname" name="ise_lastname" placeholder="Last Name">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="iseidentitygroups" class="col-sm-4 control-label">Identity Groups</label>
+                                    <div class="input-group col-sm-8">
+
+                                        <select class="form-control" id="ise_identitygroups" name="ise_identitygroups">
+                % foreach my $iseidgroup (sort keys %{$iseidgroups}) {                
+                                            <option value="$iseidgroup"><%= $iseidgroups->{$iseidgroup} %></option>
+% }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="iseemail" class="col-sm-4 control-label">E-Mail</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="ise_email" name="ise_email" placeholder="E-Mail">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="iseenablepassword" class="col-sm-4 control-label">Enable Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" name="ise_enablepassword" id="ise_enablepassword" placeholder="Enable Password">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" onclick="randomPassword('#ise_enablepassword')"><i class="fa fa-random" aria-hidden="true"></i></button>
+                                        </span>
+
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="isechangepassword" class="col-sm-4 control-label">Change Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="ise_changepassword" name="ise_changepassword" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="iseexpiryDateEnabled" class="col-sm-4 control-label">Expiration Date Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="ise_expirydateenabled" name="ise_expirydateenabled" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="iseexpirydate" class="col-sm-4 control-label">Expiration Date</label>
+                                    <div class="input-group col-sm-8 input-group date">
+                                        <input type="text" class="form-control" id="ise_expirydate" name="ise_expirydate" placeholder="01/01/2017"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="isepasswordidstore" class="col-sm-4 control-label">Password ID Store</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="ise_passwordidstore" name="ise_passwordidstore" placeholder="Internal">
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+                                </div>
+                                </div> <!-- Cisco ISE Attributes Panel -->

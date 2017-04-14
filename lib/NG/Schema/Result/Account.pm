@@ -35,6 +35,12 @@ __PACKAGE__->table("accounts");
 
 =head1 ACCESSORS
 
+=head2 uid
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 16
+
 =head2 id
 
   data_type: 'integer'
@@ -60,6 +66,8 @@ __PACKAGE__->table("accounts");
 =cut
 
 __PACKAGE__->add_columns(
+  "uid",
+  { data_type => "varchar", is_nullable => 1, size => 16 },
   "id",
   { data_type => "integer", is_nullable => 1 },
   "name",
@@ -75,8 +83,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-02-24 01:06:11
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tH4iBnZiCuvwPi4MR1fPMA
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-04-01 00:33:40
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rR5e6kpPo9jMLcbSMv07nA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -23,15 +23,16 @@
                                 </thead>
                                 <tbody>
 
-                % foreach my $account (sort keys %{$accounts}) {                
+                % foreach my $account (sort keys %{$accounts}) {
+                % next if $account =~ /^stub_/;
                                     <tr>
                                         <td><input type="checkbox" class="check_list" id="<%= $accounts->{$account}->{name} %>" name="check_<%= $accounts->{$account}->{name} %>" value="<%= $accounts->{$account}->{name} %>"></td>
                                         </td>
                                         <td><a href="/accounts/<%= $accounts->{$account}->{name} %>"><%= $accounts->{$account}->{name} %></a></td>
-                                        <td><i class="fa <%= $accounts->{$account}->{acs} %>" aria-hidden="true"></i></td>
-                                        <td><i class="fa <%= $accounts->{$account}->{ise} %>" aria-hidden="true"></i></td>
-                                        <td><i class="fa <%= $accounts->{$account}->{intermapper} %>" aria-hidden="true"></i></td>
-                                        <td><i class="fa <%= $accounts->{$account}->{hpna} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $status->{$account}->{acs} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $status->{$account}->{ise} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $status->{$account}->{intermapper} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $status->{$account}->{hpna} %>" aria-hidden="true"></i></td>
                                         <!--<td><i class="fa <%= $accounts->{$account}->{cacti} %>" aria-hidden="true"></i></td>
                                         <td><i class="fa <%= $accounts->{$account}->{ldap} %>" aria-hidden="true"></i></td>
                                         <td><i class="fa <%= $accounts->{$account}->{ad} %>" aria-hidden="true"></i></td>

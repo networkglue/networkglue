@@ -35,18 +35,23 @@ __PACKAGE__->table("ds_intermapper_users");
 
 =head1 ACCESSORS
 
-=head2 pk_id
+=head2 uid
 
-  data_type: 'integer'
-  is_auto_increment: 1
+  data_type: 'varchar'
   is_nullable: 0
-  sequence: 'ds_intermapper_users_pk_id_seq'
+  size: 72
 
 =head2 id
 
   data_type: 'varchar'
   is_nullable: 1
   size: 64
+
+=head2 source
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 1
 
 =head2 name
 
@@ -71,11 +76,6 @@ __PACKAGE__->table("ds_intermapper_users");
   data_type: 'boolean'
   is_nullable: 1
 
-=head2 enabled
-
-  data_type: 'boolean'
-  is_nullable: 1
-
 =head2 guest
 
   data_type: 'varchar'
@@ -96,15 +96,12 @@ __PACKAGE__->table("ds_intermapper_users");
 =cut
 
 __PACKAGE__->add_columns(
-  "pk_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_nullable       => 0,
-    sequence          => "ds_intermapper_users_pk_id_seq",
-  },
+  "uid",
+  { data_type => "varchar", is_nullable => 0, size => 72 },
   "id",
   { data_type => "varchar", is_nullable => 1, size => 64 },
+  "source",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "name",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "password",
@@ -116,8 +113,6 @@ __PACKAGE__->add_columns(
   "groups",
   { data_type => "varchar", is_nullable => 1, size => 128 },
   "external",
-  { data_type => "boolean", is_nullable => 1 },
-  "enabled",
   { data_type => "boolean", is_nullable => 1 },
   "guest",
   { data_type => "varchar", is_nullable => 1, size => 64 },
@@ -131,17 +126,39 @@ __PACKAGE__->add_columns(
 
 =over 4
 
-=item * L</pk_id>
+=item * L</uid>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("pk_id");
+__PACKAGE__->set_primary_key("uid");
+
+=head1 RELATIONS
+
+=head2 source
+
+Type: belongs_to
+
+Related object: L<NG::Schema::Result::DsSource>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "source",
+  "NG::Schema::Result::DsSource",
+  { id => "source" },
+  {
+    is_deferrable => 0,
+    join_type     => "LEFT",
+    on_delete     => "NO ACTION",
+    on_update     => "NO ACTION",
+  },
+);
 
 
-# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-02-09 12:04:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JTtwp0liXVr3rEyV3wOweA
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-04-01 00:33:40
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/Vp25zcDvXLh+MxU1wOyew
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

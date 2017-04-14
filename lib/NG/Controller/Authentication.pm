@@ -8,6 +8,12 @@ sub new_form { # GET /authentication/new - form to create an authentication
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');
   my $target = lc($self->param("target"));
+  my $filter = "";
+  $self->stash(filter => $filter);
+  $self->stash(items => $self->items);  
+  my $username = $self->session('username');
+  $self->stash(username => $username);
+
   if ($valid_authentications{$target})
   { $self->render("authentication/create_$target", layout => 'authentication');
   } else
@@ -20,6 +26,14 @@ sub show { # GET /authentication/123 - show authentication with id 123
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');
   my $id = $self->param("id");
+  my $filter = "";
+  my $filterheader = "";
+  $self->stash(items => $self->items);
+  $self->stash(filterheader => $filterheader);
+  $self->stash(filter => $filter);
+  my $username = $self->session('username');
+  $self->stash(username => $username);
+  
   my $rs = $self->db->resultset('Authentication');
   my $query_rs = $rs->search( { id => $id });
   my $authentication_rs  = $query_rs->first;
@@ -49,6 +63,15 @@ sub index { # GET /authentication - list of all authentications
   while (my $source = $query_rs->next)
   { $authentications->{$source->id} = {"hostname" => $source->hostname, "type" => $valid_authentications{$source->type}, "id" => $source->id };
   }
+
+  my $filter = "";
+  my $filterheader = "";
+  $self->stash(items => $self->items);
+  $self->stash(filterheader => $filterheader);
+  $self->stash(filter => $filter);
+  my $username = $self->session('username');
+  $self->stash(username => $username);
+
   $self->stash(authsources => $authentications);
   $self->render('authentication/index', layout => 'authentication');
 }

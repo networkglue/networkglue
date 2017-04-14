@@ -35,10 +35,22 @@ __PACKAGE__->table("ds_acs_users");
 
 =head1 ACCESSORS
 
+=head2 uid
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 16
+
 =head2 id
 
   data_type: 'integer'
-  is_nullable: 0
+  is_nullable: 1
+
+=head2 source
+
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 1
 
 =head2 name
 
@@ -66,9 +78,10 @@ __PACKAGE__->table("ds_acs_users");
 
 =head2 identitygroupname
 
-  data_type: 'integer'
+  data_type: 'varchar'
   is_foreign_key: 1
   is_nullable: 1
+  size: 16
 
 =head2 enabled
 
@@ -123,8 +136,12 @@ __PACKAGE__->table("ds_acs_users");
 =cut
 
 __PACKAGE__->add_columns(
+  "uid",
+  { data_type => "varchar", is_nullable => 0, size => 16 },
   "id",
-  { data_type => "integer", is_nullable => 0 },
+  { data_type => "integer", is_nullable => 1 },
+  "source",
+  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "name",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "password",
@@ -142,7 +159,7 @@ __PACKAGE__->add_columns(
   "description",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "identitygroupname",
-  { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+  { data_type => "varchar", is_foreign_key => 1, is_nullable => 1, size => 16 },
   "enabled",
   { data_type => "boolean", is_nullable => 1 },
   "passwordneverexpires",
@@ -167,13 +184,13 @@ __PACKAGE__->add_columns(
 
 =over 4
 
-=item * L</id>
+=item * L</uid>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("id");
+__PACKAGE__->set_primary_key("uid");
 
 =head1 RELATIONS
 
@@ -188,7 +205,27 @@ Related object: L<NG::Schema::Result::DsAcsIdentitygroup>
 __PACKAGE__->belongs_to(
   "identitygroupname",
   "NG::Schema::Result::DsAcsIdentitygroup",
-  { id => "identitygroupname" },
+  { uid => "identitygroupname" },
+  {
+    is_deferrable => 0,
+    join_type     => "LEFT",
+    on_delete     => "NO ACTION",
+    on_update     => "NO ACTION",
+  },
+);
+
+=head2 source
+
+Type: belongs_to
+
+Related object: L<NG::Schema::Result::DsSource>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "source",
+  "NG::Schema::Result::DsSource",
+  { id => "source" },
   {
     is_deferrable => 0,
     join_type     => "LEFT",
@@ -198,8 +235,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-02-09 12:04:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sslmAlq73hGUT/h5YWUECQ
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-04-01 00:33:40
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Yyatymoy5E1e0i8jPdabSw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

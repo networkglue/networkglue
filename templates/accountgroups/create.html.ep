@@ -22,7 +22,7 @@
                                 <div class="form-group">
                                     <label for="hostname" class="col-sm-4 control-label">Name</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" name="name" id="name" placeholder="name">
+                                        <input type="text" class="form-control" name="name" id="name" placeholder="name" required="true">
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>

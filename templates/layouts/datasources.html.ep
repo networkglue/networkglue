@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Network Glue - Data Source Setup</title>
+    <title>Network Glue - Data Sources</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
@@ -106,11 +106,6 @@
                   <li><a tabindex="-1" href="/datasources/new/acs"><i class="fa fa-fw fa-database"></i> ACS</a></li>
                   <li><a href="/datasources/new/ise"><i class="fa fa-fw fa-database"></i> ISE</a></li>
                   <li><a href="/datasources/new/intermapper"><i class="fa fa-fw fa-database"></i> Intermapper</a></li>
-                  <!--<li><a href="/datasources/new/hpna"><i class="fa fa-fw fa-database"></i> HP NA</a></li>
-                  <li><a href="/datasources/new/cacti"><i class="fa fa-fw fa-database"></i> Cacti</a></li>
-                  <li><a href="/datasources/new/ldap"><i class="fa fa-fw fa-database"></i> LDAP</a></li>
-                  <li><a href="/datasources/new/ad"><i class="fa fa-fw fa-database"></i> AD</a></li>
-                  <li><a href="/datasources/new/nagios"><i class="fa fa-fw fa-database"></i> Nagios</a></li>-->
                 </ul>
               </li>
               <li>
@@ -176,7 +171,7 @@
                     </ul>
                 </li>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> John Smith <b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>&nbsp;<%= $username %><b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
                             <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
@@ -213,62 +208,24 @@
                             <li>
                                 <a href="/accounts/">All Accounts</a>
                             </li>
+                % foreach my $item (sort keys %{$items}) {                
                             <li>
-                                <a href="#">ACS Accounts</a>
+                                <a href="/accounts?filter=<%= $item %>"><%= $items->{$item} %> Accounts</a>
                             </li>
-                            <li>
-                                <a href="#">ISE Accounts</a>
-                            </li>
-                            <li>
-                                <a href="#">Intermapper Accounts</a>
-                            </li>
-                            <li>
-                                <a href="#">HP NA Accounts</a>
-                            </li>
-                            <li>
-                                <a href="#">Cacti Accounts</a>
-                            </li>
-                            <li>
-                                <a href="#">LDAP Accounts</a>
-                            </li>
-                            <li>
-                                <a href="#">AD Accounts</a>
-                            </li>
-                            <li>
-                                <a href="#">Nagios Accounts</a>
-                            </li>
+% }
                         </ul>
                     </li>
                     <li>
                         <a href="javascript:;" data-toggle="collapse" data-target="#accountgroupsmenu"><i class="fa fa-fw fa-users"></i> Account Groups <i class="fa fa-fw fa-caret-down"></i></a>
                         <ul id="accountgroupsmenu" class="collapse">
                             <li>
-                                <a href="#">All Accounts Groups</a>
+                                <a href="/accountgroups/">All Accounts Groups</a>
                             </li>
+                % foreach my $item (sort keys %{$items}) {                
                             <li>
-                                <a href="#">ACS Groups</a>
+                                <a href="/accountgroups?filter=<%= $item %>"><%= $items->{$item} %> Account Groups</a>
                             </li>
-                            <li>
-                                <a href="#">ISE Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Intermapper Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">HP NA Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Cacti Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">LDAP Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">AD Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Nagios Groups</a>
-                            </li>
+% }
                         </ul>
                     </li>
                     <li>
@@ -277,62 +234,11 @@
                             <li>
                                 <a href="/devices/">All Devices</a>
                             </li>
+                % foreach my $item (sort keys %{$items}) {                
                             <li>
-                                <a href="#">ACS Devices</a>
+                                <a href="/devices?filter=<%= $item %>"><%= $items->{$item} %> Devices</a>
                             </li>
-                            <li>
-                                <a href="#">ISE Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">Intermapper Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">HP NA Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">Cacti Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">LDAP Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">AD Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">Nagios Devices</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="javascript:;" data-toggle="collapse" data-target="#devicegroupsmenu"><i class="fa fa-fw fa-tasks"></i> Device Groups <i class="fa fa-fw fa-caret-down"></i></a>
-                        <ul id="devicegroupsmenu" class="collapse">
-                            <li>
-                                <a href="#">All Device Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">ACS Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">ISE Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Intermapper Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">HP NA Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Cacti Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">LDAP Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">AD Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Nagios Groups</a>
-                            </li>
+% }
                         </ul>
                     </li>
                 </ul>

@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Network Glue - Data Source Setup</title>
+    <title>Network Glue - Accounts</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
@@ -19,6 +19,10 @@
     
     <!-- Custom CSS -->
     <link href="/css/sb-admin.css" rel="stylesheet">
+
+    <!-- DatePicker CSS -->
+    <link href="/css/bootstrap-datepicker3.css" rel="stylesheet">
+
 
     <!-- Custom Fonts -->
     <link href="/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -36,15 +40,12 @@
     <!-- Bootstrap Core JavaScript -->
     <script src="/js/bootstrap.min.js"></script>
 
+    <!-- Bootstrap DatePicker JavaScript -->    
+    <script src="/js/bootstrap-datepicker.min.js"></script>
+    
     <!-- DataTable Core JavaScript -->
     <script src="/js/jquery.dataTables.min.js"></script>
     <script src="/js/dataTables.buttons.min.js"></script>
-    <script src="/js/buttons.flash.min.js"></script>
-    <script src="/js/pdfmake.min.js"></script>
-    <script src="/js/vfs_fonts.js"></script>
-    <script src="/js/buttons.html5.min.js"></script>
-    <script src="/js/buttons.print.min.js"></script>
-    <script src="/js/jszip.min.js"></script>
     <script src="/js/dataTables.colReorder.min.js"></script>
     <script src="/js/dataTables.select.min.js"></script>
 
@@ -73,24 +74,23 @@
     <script src="/js/bootstrap-toggle.min.js"></script>
     <script>
         $(document).ready(function(){
-                
+          $('#acs_dateexceeds').datepicker();
+          $('#ise_expirydate').datepicker();
+          $('.input-group.date').datepicker();
+          $('.input-group.date').datepicker();
+          
           $(document).on('show','.accordion', function (e) {
           $(e.target).prev('.collapse').addClass('glyphicon-chevron-up');
-          alert("show");
           });
     
           $(document).on('hide','.accordion', function (e) {
           $(this).find('.collapse').not($(e.target)).removeClass('glyphicon-chevron-up');
-          alert("hide");
           });
                 
           $('#accounttable').DataTable( {
             colReorder: true,
             responsive: true,
             pageLength: 50,
-                buttons: [
-                    'copyHtml5','excelHtml5','csvHtml5','pdfHtml5'
-                ],
             columnDefs: [ {
             orderable: false,
             className: 'select-checkbox',
@@ -129,6 +129,18 @@
                 });
           url = "/accounts/"+ first +"?_method=delete&" + url;
           document.location.href = url;
+        }
+        
+        function randomPassword(target)
+        { var chars = "abcdefghijklmnopqrstuvwxyz!@#$%&*-+ABCDEFGHIJKLMNOP1234567890";
+          var pass = "";
+          for (var x = 0; x < 12; x++)
+          { var i = Math.floor(Math.random() * chars.length);
+            pass += chars.charAt(i);
+          }
+          $(target).val(pass);
+          $(target).attr('type', 'text');
+          return pass;
         }
                         
     </script>
@@ -221,7 +233,7 @@
                     </ul>
                 </li>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> John Smith <b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i>&nbsp;<%= $username %> <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
                             <a href="#"><i class="fa fa-fw fa-user"></i> Profile</a>
@@ -284,62 +296,11 @@
                             <li>
                                 <a href="/devices/">All Devices</a>
                             </li>
+                % foreach my $item (sort keys %{$items}) {                
                             <li>
-                                <a href="#">ACS Devices</a>
+                                <a href="/devices?filter=<%= $item %>"><%= $items->{$item} %> Devices</a>
                             </li>
-                            <li>
-                                <a href="#">ISE Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">Intermapper Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">HP NA Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">Cacti Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">LDAP Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">AD Devices</a>
-                            </li>
-                            <li>
-                                <a href="#">Nagios Devices</a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="javascript:;" data-toggle="collapse" data-target="#devicegroupsmenu"><i class="fa fa-fw fa-tasks"></i> Device Groups <i class="fa fa-fw fa-caret-down"></i></a>
-                        <ul id="devicegroupsmenu" class="collapse">
-                            <li>
-                                <a href="#">All Device Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">ACS Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">ISE Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Intermapper Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">HP NA Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Cacti Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">LDAP Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">AD Groups</a>
-                            </li>
-                            <li>
-                                <a href="#">Nagios Groups</a>
-                            </li>
+% }
                         </ul>
                     </li>
                 </ul>

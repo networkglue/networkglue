@@ -1,0 +1,83 @@
+                                <div class="panel-footer">
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="acs_toggle" value="1"></div>
+                                <h5><a href="#" data-toggle="collapse" data-target="#acsattributes">Cisco ACS Attributes</a></h5>
+                                <div id="acsattributes" class="collapse">
+                                <div class="form-group">
+                                    <label for="acsenabled" class="col-sm-4 control-label">Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="acs_enabled" name="acs_enabled" value="1">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acspassword" class="col-sm-4 control-label">Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" id="acs_password" name="acs_password" placeholder="Password">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button" onclick="randomPassword('#acs_password')"><i class="fa fa-random" aria-hidden="true"></i></button>
+                                        </span>
+
+                                    </div>
+                                </div>                                
+                                <div class="clearfix"></div>
+                                <div class="form-group">
+                                    <label for="acsdescription" class="col-sm-4 control-label">Description</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="acs_description" name="acs_description" placeholder="Description">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acsidentitygroup" class="col-sm-4 control-label">Identity Group</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="acs_identitygroupname" name="acs_identitygroupname" placeholder="Identity Group Name">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acsidentitygroup" class="col-sm-4 control-label">Identity Group</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="acs_identitygroupname" name="acs_identitygroupname">
+                % foreach my $acsidgroup (sort keys %{$acsidgroups}) {                
+                                            <option value="$acsidgroup"><%= $acsidgroups->{$acsidgroup} %></option>
+% }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="acsenablepassword" class="col-sm-4 control-label">Enable Password</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="password" class="form-control" name="acs_enablepassword" id="acsenablepassword" placeholder="Enable Password">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="acspasswordneverexpires" class="col-sm-4 control-label">Password Never Expires</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="acs_passwordneverexpires" name="acs_passwordneverexpires" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="acsdateexceedsenabled" class="col-sm-4 control-label">Expiration Date Enabled</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="checkbox" id="acs_dateexceedsenabled" name="acs_dateexceedsenabled" value="1">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="acsdateexceeds" class="col-sm-4 control-label">Expiration Date</label>
+                                    <div class="input-group col-sm-8 input-group date">
+                                        <input type="text" class="form-control" id="acs_dateexceeds" name="acs_dateexceeds" placeholder="01/01/2017"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="acspasswordtype" class="col-sm-4 control-label">Password Type</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="acs_passwordtype" name="acs_passwordtype" placeholder="Internal">
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+                                </div>
+                                </div> <!-- Cisco ACS Attributes Panel -->
