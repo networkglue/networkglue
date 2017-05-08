@@ -39,7 +39,7 @@
                                     <div class="input-group col-sm-8">
                                         <select class="form-control" id="authentication" name="authentication">
                 % foreach my $authgroup (sort keys %{$authgroups}) {                
-                                            <option value="$authgroup"><%= $authgroups->{$authgroup}{"hostname"} %> (<%= $authgroups->{$authgroup}{"type"} %>)</option>
+                                            <option value="<%= $authgroup%>"><%= $authgroups->{$authgroup}{"hostname"} %> (<%= $authgroups->{$authgroup}{"type"} %>)</option>
 % }
                                         </select>
                                     </div>

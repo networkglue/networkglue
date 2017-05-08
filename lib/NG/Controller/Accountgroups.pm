@@ -71,12 +71,16 @@ sub index { # GET /accountgroups - list of all accountgroups
   $self->consolidate();
   my $filter = $self->param('filter');
   my %accountgroups = %{ $accountgroups };
+  my %status = ();
   for my $accountgroup (keys %accountgroups)
-  { for my $key (qw(acs ise ad ldap nagios hpna intermapper cacti))
-    { $accountgroups->{$accountgroup}{$key} = ($accountgroups->{$accountgroup}{$key} && $accountgroups->{$accountgroup}{$key} ne "fa-close text-danger") ? "fa-check text-success" : "fa-close text-danger"; 
+  { #for my $key (qw(acs ise ad ldap nagios hpna intermapper cacti))
+    for my $key (qw(acs ise intermapper))
+    { #$accountgroups->{$accountgroup}{$key} = ($accountgroups->{$accountgroup}{$key} && $accountgroups->{$accountgroup}{$key} ne "fa-close text-danger") ? "fa-check text-success" : "fa-close text-danger"; 
+	  $status{$accountgroup}{$key} = ($accountgroups->{$accountgroup}{$key} && $accountgroups->{$accountgroup}{$key} ne "fa-close text-danger") ? "fa-check text-success" : "fa-close text-danger"; 
     }
   }
   $self->stash(accountgroups => $accountgroups);
+  $self->stash(status => \%status);
   my $filterheader = "";
   if ($filter)
   { my %accountgroups = %{ $accountgroups };
@@ -84,13 +88,13 @@ sub index { # GET /accountgroups - list of all accountgroups
     my %filteraccountgroups = ();
     @filteraccountgroups{@keys} = @accountgroups{@keys};
     $self->stash(accountgroups => \%filteraccountgroups);
-    $filterheader = "$items->{$filter} Account Group - ";
+    $filterheader = $self->items->{$filter}->type->shortname ." Account Group - ";
   } else
   {  $self->stash(accountgroups => $accountgroups); }
   my $username = $self->session('username');
   $self->stash(username => $username);
 
-  $self->stash(items => $items);
+  $self->stash(items => $self->items);
   $self->stash(filterheader => $filterheader);
   $filter = "?filter=$filter" if $filter;
   $self->stash(filter => $filter);
@@ -404,8 +408,18 @@ sub consolidate {
         $accountgroups->{$db->{$key}->name}{"ise"} = 1;
         $accountgroups->{$db->{$key}->name}{"ise_id"} = $db->{$key}->id;
       }
-      $acs->users(users => \%acs);
-      $intermapper->users(\%intermapper);
+      # TODO: FIX THIS AND USE SEPARATE UID TO IDENTIFY CORRECT DATA SOURCE
+      for my $source (keys %datasources)
+      { if (ref($datasources{$source}) eq "Net::Cisco::ACS")
+        { #$acs->users(users => \%acs);
+        }
+        if (ref($datasources{$source}) eq "Net::Cisco::ISE")
+        { #$ise->internalusers(internalusers => \%ise);
+        }
+        if (ref($datasources{$source}) eq "Net::Intermapper")
+        { #$intermapper->users(\%intermapper);
+        }
+      }      
     }
   }
   #$self->app->log->debug(Dumper \$accounts);

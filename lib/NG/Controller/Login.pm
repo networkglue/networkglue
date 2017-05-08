@@ -44,7 +44,6 @@ sub user_exists
   my $account_rs = $self->db->resultset('Account');
   my $query_rs = $account_rs->search({ name => $username});
   my $user = $query_rs->first;
-  #$self->app->log->debug($user->authentication);
   
   if ($user && $user->authentication == 0)
   { if (length($user->password) > 64) # Expect a user password not to be longer than 64 characters!?!? 

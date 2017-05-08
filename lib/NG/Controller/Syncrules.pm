@@ -1,9 +1,16 @@
-package NG::Controller::Mappings;
+package NG::Controller::Syncrules;
 use Mojo::Base 'Mojolicious::Controller';
 use Data::Dumper;
 
+my %table = {"ACS" => { "Users" => ["name", "enabled", "enablepassword", "dateexceedsenabled", "dateexceeds", "identitygroupname"]
+                      },
+             "Intermapper" => {"Users" => ["name", "groups", "external"]
+                              },
+             "ISE" => { "Users" => ["name", "enabled", "enablepassword", "expirydateenabled", "expirydate","identitygroups","firstname","lastname","email"]}
+};
+
 # This action will render a template
-sub show { # GET /mappings/123 - show mapping with id 123
+sub show { # GET /syncrules/123 - show mapping with id 123
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');
   my $id = $self->param("id");
@@ -16,20 +23,20 @@ sub show { # GET /mappings/123 - show mapping with id 123
   my $username = $self->session('username');
   $self->stash(username => $username);
 
-  $self->render('mappings/detail', layout => 'mappings');
+  $self->render('syncrules/detail', layout => 'syncrules');
 }
 
-sub edit_form { # GET /mappings/123/edit - form to update a mapping
+sub edit_form { # GET /syncrules/123/edit - form to update a mapping
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');
   my $id = $self->param("id");  
 }
 
 # This action will render a template
-sub index { # GET /mappings - list of all mappings
+sub index { # GET /syncrules - list of all syncrules
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');
-  my $mappings = undef;
+  my $syncrules = undef;
 
   my $sources_rs = $self->db->resultset('DsSource');
   my $query_rs = $sources_rs->search;
@@ -39,19 +46,12 @@ sub index { # GET /mappings - list of all mappings
   { $datasources{$source->id} = $source;
   }
   
-  my $mapping_rs = $self->db->resultset('Mapping');
-  $query_rs = $mapping_rs->search;
-
-  while (my $mapping = $query_rs->next)
-  { $mappings->{$mapping->id}{"id"} = $mapping->id if $mapping->id;
-    $mappings->{$mapping->id}{"source_ds"} = $datasources{$mapping->source_ds} if $mapping->source_ds;
-    $mappings->{$mapping->id}{"source_table"} = $mapping->source_table if $mapping->source_table;
-    $mappings->{$mapping->id}{"source_field"} = $mapping->source_field if $mapping->source_field;
-    $mappings->{$mapping->id}{"destination_ds"} = $datasources{$mapping->destination_ds} if $mapping->destination_ds;
-    $mappings->{$mapping->id}{"destination_table"} = $mapping->destination_table if $mapping->destination_table;
-    $mappings->{$mapping->id}{"destination_field"} = $mapping->destination_field if $mapping->destination_field;
-
-    #$self->app->log->debug(Dumper \$mapping->source_table);
+  my $syncrule_rs = $self->db->resultset('Syncrule');
+  $query_rs = $syncrule_rs->search;
+  while (my $syncrule = $query_rs->next)
+  { $syncrules->{$syncrule->id}{"id"} = $syncrule->id if $syncrule->id;
+    $syncrules->{$syncrule->id}{"source_ds"} = $datasources{$syncrule->source_ds} if $syncrule->source_ds;
+    $syncrules->{$syncrule->id}{"destination_ds"} = $datasources{$syncrule->destination_ds} if $syncrule->destination_ds;
   }
     
   my $filter = "";
@@ -61,12 +61,11 @@ sub index { # GET /mappings - list of all mappings
   $self->stash(filter => $filter);
   my $username = $self->session('username');
   $self->stash(username => $username);
-  
-  $self->stash(mappings => $mappings);
-  $self->render('mappings/index', layout => 'mappings');
+  $self->stash(syncrules => $syncrules);
+  $self->render('syncrules/index', layout => 'syncrules');
 }
 
-sub new_form { # GET /mappings/new - form to create a mappings
+sub new_form { # GET /syncrules/new - form to create a syncrules
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');
   my $filter = "";
@@ -77,25 +76,20 @@ sub new_form { # GET /mappings/new - form to create a mappings
   my $username = $self->session('username');
   $self->stash(username => $username);
 
-  $self->render('mappings/create', layout => 'mappings');
+  $self->render('syncrules/create', layout => 'syncrules');
 }
 
-sub update { # PUT /mappings/123 - update a mapping
+sub update { # PUT /syncrules/123 - update a mapping
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');
   my $id = $self->param("id");    
 }
 
 
-sub delete { # DELETE /mappings/123 - delete a mapping
+sub delete { # DELETE /syncrules/123 - delete a mapping
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');
   my $id = $self->param("id");      
-}
-
-sub json {
-  my $self = shift;
-  my $target = param("target");
 }
 
 1;

@@ -23,211 +23,259 @@
                                 <div class="form-group">
                                     <label for="priority" class="col-sm-4 control-label">Source Data Source</label>
                                     <div class="input-group col-sm-8">
-                                        <select class="form-control" id="priority" name="source_ds" class="form-control">
-                                                <option value="1">Cisco ACS</option>
-                                                <option value="2">Intermapper</option>
-                                                <option value="3">Cisco ISE</option>
+                                        <select class="form-control" id="source_ds" name="source_ds" class="form-control">
+                                                <option value="acs">Cisco ACS</option>
+                                                <option value="ise">Cisco ISE</option>
+                                                <option value="intermapper">Intermapper</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
 
+                                <div id="source_acs_panel"> <!-- ACS Panel -->
                                 <div class="panel-footer">
                                 <div class="form-group">
                                     <label for="priority" class="col-sm-4 control-label">Source Data Table</label>
                                     <div class="input-group col-sm-8">
-                                        <select class="form-control" id="priority" name="source_table" class="form-control">
-                                                <option value="users">users (Accounts)</option>
-                                                <option value="identitygroups">Account Groups</option>
-                                                <option value="3">Devices</option>
+                                        <select class="form-control" id="source_table" name="source_table" class="form-control">
+                                                <option value="users">Users (Accounts)</option>
+                                                <option value="identitygroups">Identitygroups (Account Groups)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Source Field</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="source_field" name="source_field" class="form-control">
+                                                <option value="name">name</option>
+                                                <option value="password">password</option>
+                                                <option value="enablepassword">enablepassword</option>
+                                                <option value="description">description</option>
+                                                <option value="identitygroupname">identitygroupname</option>
+                                                <option value="enabled">enabled</option>
+                                                <option value="passwordtype">passwordtype</option>
+                                                <option value="dateexceeds">dateexceeds</option>
+                                                <option value="dateexceedsenabled">dateexceedsenabled</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
 
+                                <div class="form-group">
+                                    <label for="priority" class="col-sm-4 control-label">Static Value</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="source_static" name="source_static" placeholder="Only Match Fields with this value">                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                </div> <!-- ACS Panel -->
+                                </div>
+
+                                <div id="source_ise_panel"> <!-- ISE Panel -->
+                                <div class="panel-footer">
+                                <div class="form-group">
+                                    <label for="priority" class="col-sm-4 control-label">Source Data Table</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="source_table" name="source_table" class="form-control">
+                                                <option value="internalusers">Internal Users (Accounts)</option>
+                                                <option value="identitygroups">Identitygroup (Account Groups)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
                                 
                                 <div class="form-group">
-                                    <label for="hostname" class="col-sm-4 control-label">Password</label>
+                                    <label for="hostname" class="col-sm-4 control-label">Source Field</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="password" class="form-control" id="password" name="password" placeholder="password">
+                                        <select class="form-control" id="source_field" name="source_field" class="form-control">
+                                                <option value="name">name</option>
+                                                <option value="password">password</option>
+                                                <option value="enablepassword">enablepassword</option>
+                                                <option value="description">description</option>
+                                                <option value="identitygroupname">identitygroupname</option>
+                                                <option value="enabled">enabled</option>
+                                                <option value="passwordtype">passwordtype</option>
+                                                <option value="dateexceeds">dateexceeds</option>
+                                                <option value="dateexceedsenabled">dateexceedsenabled</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="priority" class="col-sm-4 control-label">Static Value</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="source_static" name="source_static" placeholder="Only Match Fields with this value">                                    </div>
                                 </div>
+                                <div class="clearfix"></div>
+                                </div> <!-- ISE Panel -->
+                                </div>
+
+                                <div id="source_intermapper_panel"> <!-- Intermapper Panel -->
+                                <div class="panel-footer">
+                                <div class="form-group">
+                                    <label for="priority" class="col-sm-4 control-label">Source Data Table</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="source_table" name="source_table" class="form-control">
+                                                <option value="users">Users (Accounts)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Source Field</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="source_field" name="source_field" class="form-control">
+                                                <option value="name">name</option>
+                                                <option value="password">password</option>
+                                                <option value="groups">groups</option>
+                                                <option value="external">external</option>
+                                                <option value="guest">guest</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="priority" class="col-sm-4 control-label">Static Value</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="source_static" name="source_static" placeholder="Only Match Fields with this value">                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                </div> <!-- Intermapper Panel -->
+
+                                </div> <!-- Source -->
+
 
                                 <div class="panel-footer">
-                                <h5><a href="#" data-toggle="collapse" data-target="#acsattributes">Cisco ACS Attributes</a></h5>
-                                <div id="acsattributes" class="collapse">
                                 <div class="form-group">
-                                    <label for="acsenabled" class="col-sm-4 control-label">Enabled</label>
+                                    <label for="priority" class="col-sm-4 control-label">Destination Data Destination</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="enabled" name="acs_enabled" value="1">
-                                    </div>
-                                </div>
-                                <div class="clearfix"></div>
-                                <div class="form-group">
-                                    <label for="acsdescription" class="col-sm-4 control-label">Description</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="acsdescription" name="acs_description" placeholder="Description">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="acsidentitygroup" class="col-sm-4 control-label">Identity Group</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="acsidentitygroupname" name="acs_identitygroupname" placeholder="Identity Group Name">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="acsenablepassword" class="col-sm-4 control-label">Enable Password</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="password" class="form-control" name="acs_enablepassword" id="acsenablepassword" placeholder="Enable Password">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="acspasswordneverexpires" class="col-sm-4 control-label">Password Never Expires</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="passwordneverexpires" name="acs_passwordneverexpires" value="1">
+                                        <select class="form-control" id="destination_ds" name="destination_ds" class="form-control">
+                                                <option value="acs">Cisco ACS</option>
+                                                <option value="ise">Cisco ISE</option>
+                                                <option value="intermapper">Intermapper</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
 
-                                <div class="form-group">
-                                    <label for="acsdateexceedsenabled" class="col-sm-4 control-label">Expiration Date Enabled</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="dateexceedsenabled" name="acs_dateexceedsenabled" value="1">
-                                    </div>
-                                </div>
-                                <div class="clearfix"></div>
-
-                                <div class="form-group">
-                                    <label for="acsdateexceeds" class="col-sm-4 control-label">Expiration Date</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="acsdateexceeds" name="acs_dateexceeds" placeholder="01/01/2017">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="acspasswordtype" class="col-sm-4 control-label">Password Type</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="acspasswordtype" name="acs_passwordtype" placeholder="Internal">
-                                    </div>
-                                </div>
-
-                                <div class="clearfix"></div>
-                                </div>
-                                </div> <!-- Cisco ACS Attributes Panel -->
-
+                                <div id="destination_acs_panel"> <!-- ACS Panel -->
                                 <div class="panel-footer">
-                                <h5><a href="#" data-toggle="collapse" data-target="#iseattributes">Cisco ISE Attributes</a></h5>
-                                <div id="iseattributes" class="collapse">
-
                                 <div class="form-group">
-                                    <label for="iseenabled" class="col-sm-4 control-label">Enabled</label>
+                                    <label for="priority" class="col-sm-4 control-label">Destination Data Table</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="enabled" name="ise_enabled" value="1">
+                                        <select class="form-control" id="destination_table" name="destination_table" class="form-control">
+                                                <option value="users">Users (Accounts)</option>
+                                                <option value="identitygroups">Identitygroups (Account Groups)</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
+                                
                                 <div class="form-group">
-                                    <label for="isefirstname" class="col-sm-4 control-label">First Name</label>
+                                    <label for="hostname" class="col-sm-4 control-label">Destination Field</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="isefirstname" name="ise_firstname" placeholder="First Name">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="iselastname" class="col-sm-4 control-label">Last Name</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="iselastname" name="ise_lastname" placeholder="Last Name">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="iseidentitygroups" class="col-sm-4 control-label">Identity Groups</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="iseidentitygroups" name="ise_identitygroups" placeholder="Identity Groups">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="iseemail" class="col-sm-4 control-label">E-Mail</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="iseemail" name="ise_email" placeholder="E-Mail">
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="iseenablepassword" class="col-sm-4 control-label">Enable Password</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="password" class="form-control" name="ise_enablepassword" id="iseenablepassword" placeholder="Enable Password">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="isechangepassword" class="col-sm-4 control-label">Change Password</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="isechangepassword" name="ise_changepassword" value="1">
+                                        <select class="form-control" id="destination_field" name="destination_field" class="form-control">
+                                                <option value="name">name</option>
+                                                <option value="password">password</option>
+                                                <option value="enablepassword">enablepassword</option>
+                                                <option value="description">description</option>
+                                                <option value="identitygroupname">identitygroupname</option>
+                                                <option value="enabled">enabled</option>
+                                                <option value="passwordtype">passwordtype</option>
+                                                <option value="dateexceeds">dateexceeds</option>
+                                                <option value="dateexceedsenabled">dateexceedsenabled</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
 
                                 <div class="form-group">
-                                    <label for="iseexpiryDateEnabled" class="col-sm-4 control-label">Expiration Date Enabled</label>
+                                    <label for="priority" class="col-sm-4 control-label">Static Value</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="iseexpirydateenabled" name="ise_expirydateenabled" value="1">
-                                    </div>
+                                        <input type="text" class="form-control" id="destination_static" name="destination_static" placeholder="Only Match Fields with this value">                                    </div>
                                 </div>
                                 <div class="clearfix"></div>
-
-                                <div class="form-group">
-                                    <label for="iseexpirydate" class="col-sm-4 control-label">Expiration Date</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="iseexpirydate" name="ise_expirydate" placeholder="01/01/2017">
-                                    </div>
+                                </div> <!-- ACS Panel -->
                                 </div>
 
-                                <div class="form-group">
-                                    <label for="isepasswordidstore" class="col-sm-4 control-label">Password ID Store</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="isepasswordidstore" name="ise_passwordidstore" placeholder="Internal">
-                                    </div>
-                                </div>
-
-                                <div class="clearfix"></div>
-                                </div>
-                                </div> <!-- Cisco ISE Attributes Panel -->
-
+                                <div id="destination_ise_panel"> <!-- ISE Panel -->
                                 <div class="panel-footer">
-                                <h5><a href="#" data-toggle="collapse" data-target="#intermapperattributes">Intermapper Attributes</a></h5>
-                                <div id="intermapperattributes" class="collapse">
-
                                 <div class="form-group">
-                                    <label for="intermappergroups" class="col-sm-4 control-label">Groups</label>
+                                    <label for="priority" class="col-sm-4 control-label">Destination Data Table</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="intermappergroups" name="intermapper_groups" placeholder="Groups">
+                                        <select class="form-control" id="destination_table" name="destination_table" class="form-control">
+                                                <option value="internalusers">Internal Users (Accounts)</option>
+                                                <option value="identitygroups">Identitygroup (Account Groups)</option>
+                                        </select>
                                     </div>
                                 </div>
-
+                                <div class="clearfix"></div>
+                                
                                 <div class="form-group">
-                                    <label for="intermapperpassword" class="col-sm-4 control-label">Password</label>
+                                    <label for="hostname" class="col-sm-4 control-label">Destination Field</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="password" class="form-control" name="intermapper_password" id="intermapperpassword" placeholder="Password">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="intermapperexternal" class="col-sm-4 control-label">External</label>
-                                    <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="intermapperexternal" name="intermapper_external" value="1">
+                                        <select class="form-control" id="destination_field" name="destination_field" class="form-control">
+                                                <option value="name">name</option>
+                                                <option value="password">password</option>
+                                                <option value="enablepassword">enablepassword</option>
+                                                <option value="description">description</option>
+                                                <option value="identitygroupname">identitygroupname</option>
+                                                <option value="enabled">enabled</option>
+                                                <option value="passwordtype">passwordtype</option>
+                                                <option value="dateexceeds">dateexceeds</option>
+                                                <option value="dateexceedsenabled">dateexceedsenabled</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
 
                                 <div class="form-group">
-                                    <label for="intermapperguest" class="col-sm-4 control-label">Guest</label>
+                                    <label for="priority" class="col-sm-4 control-label">Static Value</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="intermapperguest" name="intermapper_guest" placeholder="Guest Login">
-                                    </div>
+                                        <input type="text" class="form-control" id="destination_static" name="destination_static" placeholder="Only Match Fields with this value">                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                </div> <!-- ISE Panel -->
                                 </div>
 
+                                <div id="destination_intermapper_panel"> <!-- Intermapper Panel -->
+                                <div class="panel-footer">
+                                <div class="form-group">
+                                    <label for="priority" class="col-sm-4 control-label">Destination Data Table</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="destination_table" name="destination_table" class="form-control">
+                                                <option value="users">Users (Accounts)</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                </div> <!-- Cisco ISE Attributes Panel -->
+                                <div class="clearfix"></div>
+                                
+                                <div class="form-group">
+                                    <label for="hostname" class="col-sm-4 control-label">Destination Field</label>
+                                    <div class="input-group col-sm-8">
+                                        <select class="form-control" id="destination_field" name="destination_field" class="form-control">
+                                                <option value="name">name</option>
+                                                <option value="password">password</option>
+                                                <option value="groups">groups</option>
+                                                <option value="external">external</option>
+                                                <option value="guest">guest</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="form-group">
+                                    <label for="priority" class="col-sm-4 control-label">Static Value</label>
+                                    <div class="input-group col-sm-8">
+                                        <input type="text" class="form-control" id="destination_static" name="destination_static" placeholder="Only Match Fields with this value">                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                </div> <!-- Intermapper Panel -->
+                                </div>
 
 
                                 <div class="panel-footer">                                

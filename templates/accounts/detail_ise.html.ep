@@ -37,8 +37,8 @@
                                     <label for="iseidentitygroups" class="col-sm-4 control-label">Identity Groups</label>
                                     <div class="input-group col-sm-8">
                                         <select class="form-control" id="ise_identitygroups" name="ise_identitygroups_<%= $uid %>">
-                % foreach my $iseidgroup (sort keys %{$iseidgroups}) {                
-                                            <option value="<%= $iseidgroup%>"<%= $iseidgroups->{$iseidgroup}{"selected"} %>><%= $iseidgroups->{$iseidgroup}{"name"} %></option>
+                % foreach my $iseidgroup (sort keys %{$iseidgroups-> { $account->{"ise"}{$uid}{"source"}->id } }) {                
+                                            <option value="<%= $iseidgroup%>"<%= $iseidgroups->{ $account->{"ise"}{$uid}{"source"}->id }{$iseidgroup}{"selected"} %>><%= $iseidgroups->{ $account->{"ise"}{$uid}{"source"}->id }{$iseidgroup}{"name"} %></option>
 % }
                                         </select>
                                     </div>

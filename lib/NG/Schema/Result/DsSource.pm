@@ -182,6 +182,66 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 mappings_destination_ds
+
+Type: has_many
+
+Related object: L<NG::Schema::Result::Mapping>
+
+=cut
+
+__PACKAGE__->has_many(
+  "mappings_destination_ds",
+  "NG::Schema::Result::Mapping",
+  { "foreign.destination_ds" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 mappings_source_ds
+
+Type: has_many
+
+Related object: L<NG::Schema::Result::Mapping>
+
+=cut
+
+__PACKAGE__->has_many(
+  "mappings_source_ds",
+  "NG::Schema::Result::Mapping",
+  { "foreign.source_ds" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 syncrules_destination_ds
+
+Type: has_many
+
+Related object: L<NG::Schema::Result::Syncrule>
+
+=cut
+
+__PACKAGE__->has_many(
+  "syncrules_destination_ds",
+  "NG::Schema::Result::Syncrule",
+  { "foreign.destination_ds" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 syncrules_source_ds
+
+Type: has_many
+
+Related object: L<NG::Schema::Result::Syncrule>
+
+=cut
+
+__PACKAGE__->has_many(
+  "syncrules_source_ds",
+  "NG::Schema::Result::Syncrule",
+  { "foreign.source_ds" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 type
 
 Type: belongs_to
@@ -203,8 +263,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-03-25 23:41:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RQGoUHMbZzNmUzcPt70YuA
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-04-23 00:11:14
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gFn4iDG1XKwo5ChowTeg1w
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

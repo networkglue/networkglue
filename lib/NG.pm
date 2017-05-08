@@ -54,12 +54,15 @@ sub startup {
   $r->route('/accounts/synchronize/')->to('accounts#synchronize');
   
   $self->resources('datasources');
-  $self->resources('devices');
-  $self->resources('devicegroups');  
+  #$self->resources('devices');
+  #$self->resources('devicegroups');  
   $self->resources('accountgroups');
   $self->resources('accounts');
   $self->resources('mappings'); 
   $self->resources('authentication'); 
+
+  $r->route('/sync/rules/')->to('syncrules#index');
+  $r->route('/sync/mappings/')->to('mappings#index');  
  
   $r->route('/datasources/new/:target')->to('datasources#new_form');
   $r->route('/authentication/new/:target')->to('authentication#new_form');
@@ -86,7 +89,6 @@ sub sources {
   while (my $source = $query_rs->next)
   { $sources->{$source->type->shortname} = $source;
   }
-  $self->app->log->debug(keys %{ $sources });
   return $sources;
 }
 

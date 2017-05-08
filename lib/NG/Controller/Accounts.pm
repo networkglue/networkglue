@@ -27,39 +27,67 @@ sub new_form { # GET /accounts/new - form to create a account
   my $filter = "";
   $self->stash(filter => $filter);
   $self->stash(items => $self->items);  
-
-  my $acs_rs = $self->db->resultset('DsAcsIdentitygroup');
-  my $query_rs = $acs_rs->search;
-  my $acsidgroups = {};
-  while (my $accountgroup = $query_rs->next)
-  { $acsidgroups->{$accountgroup->uid} = $accountgroup->name; }
-  $self->stash(acsidgroups => $acsidgroups);
-
-  my $ise_rs = $self->db->resultset('DsIseIdentitygroup');
-  $query_rs = $ise_rs->search;
-  my $iseidgroups = {};
-  while (my $accountgroup = $query_rs->next)
-  { $iseidgroups->{$accountgroup->uid} = $accountgroup->name; }
-  $self->stash(iseidgroups => $iseidgroups);
-
+  my $id = 0;
+  #$self->stash(iseaccounts => $iseaccounts_ref);
+  my $filterheader = "";
   my $auth_rs = $self->db->resultset('Authentication');
-  $query_rs = $auth_rs->search;
+  my $query_rs = $auth_rs->search;
   my $authgroups = { "0" => { "hostname" => "Local", "type" => "-" } };
+  
   while (my $authgroup = $query_rs->next)
   { $authgroups->{$authgroup->id}{"hostname"} = $authgroup->hostname;
     $authgroups->{$authgroup->id}{"type"} = $authgroup->type;
   }
   $self->stash(authgroups => $authgroups);
+
+  my %acs_toggle = ();
+  my %ise_toggle = ();
+  my %im_toggle = ();
+  
+  my $sources_rs = $self->db->resultset('DsSource');
+  $query_rs = $sources_rs->search;
+  my %sources = ();
+
+  while (my $source = $query_rs->next)
+  { $sources{$source->id} = $source;
+  }
+
+  my $account = {};  
+  for my $source (keys %sources)
+  { $account->{"stub_ise"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ISE";
+    $account->{"stub_acs"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ACS";
+    $account->{"stub_intermapper"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
+  }
+  
+  $self->stash(account => $account);
+  
+  my $acs_rs = $self->db->resultset('DsAcsIdentitygroup');
+  $query_rs = $acs_rs->search({});
+  my $acsidgroups = {};
+  while (my $accountgroup = $query_rs->next)
+  { $acsidgroups->{$accountgroup->source->id}{$accountgroup->uid}{"name"} = $accountgroup->name; }
+  $self->stash(acsidgroups => $acsidgroups);
+  
+  my $ise_rs = $self->db->resultset('DsIseIdentitygroup');
+  $query_rs = $ise_rs->search;
+  my $iseidgroups = {};
+  while (my $accountgroup = $query_rs->next)
+  { $iseidgroups->{$accountgroup->source->id}{$accountgroup->uid}{"name"} = $accountgroup->name; }
+  $self->stash(iseidgroups => $iseidgroups);
   
   my $im_rs = $self->db->resultset('DsIntermapperUser');
   $query_rs = $im_rs->search;
   my $imidgroups = {};
   while (my $accountgroup = $query_rs->next)
-  { my (@groups) = split(/\,/,$accountgroup->groups);
+  { last unless $accountgroup->groups;
+    my (@groups) = split(/\,/,$accountgroup->groups);
     for my $name (@groups)
-    { $imidgroups->{$name}{"name"} = $name;
-    }
+    { $imidgroups->{$accountgroup->source->id}{$name}{"name"} = $name; }
   } 
+
+  $self->stash(acs_toggle => \%acs_toggle);
+  $self->stash(ise_toggle => \%ise_toggle);
+  $self->stash(im_toggle => \%im_toggle);
   my $username = $self->session('username');
   $self->stash(username => $username);
 
@@ -109,8 +137,8 @@ sub show { # GET /accounts/123 - show account with id 123
       my $acsidgroups = {};
 
       while (my $accountgroup = $query_rs->next)
-     { $acsidgroups->{$accountgroup->uid}{"name"} = $accountgroup->name;
-       $acsidgroups->{$accountgroup->uid}{"selected"} = " selected" if $account->{"acs_identitygroupname"} && $account->{"acs_identitygroupname"} eq $accountgroup->name;
+     { $acsidgroups->{$accountgroup->source->id}{$accountgroup->uid}{"name"} = $accountgroup->name;
+       $acsidgroups->{$accountgroup->source->id}{$accountgroup->uid}{"selected"} = " selected" if $account->{"acs_identitygroupname"} && $account->{"acs_identitygroupname"} eq $accountgroup->name;
      }
      $self->stash(acsidgroups => $acsidgroups);
      #my $acs_toggle = $account->{"acs_status"} && $account->{"acs_status"} ne "fa-close text-danger" ? " checked" : "";
@@ -122,12 +150,12 @@ sub show { # GET /accounts/123 - show account with id 123
       my $iseidgroups = {};
 
       while (my $accountgroup = $query_rs->next)
-      { $iseidgroups->{$accountgroup->uid}{"name"} = $accountgroup->name;
-        $iseidgroups->{$accountgroup->uid}{"selected"} = " selected" if $account->{"ise_identitygroups"} && $account->{"ise_identitygroups"} eq $accountgroup->uid;
+      { $iseidgroups->{$accountgroup->source->id}{$accountgroup->uid}{"name"} = $accountgroup->name;
+        $iseidgroups->{$accountgroup->source->id}{$accountgroup->uid}{"selected"} = " selected" if $account->{"ise_identitygroups"} && $account->{"ise_identitygroups"} eq $accountgroup->name;
       }
       $self->stash(iseidgroups => $iseidgroups);
       #my $ise_toggle = $account->{"ise_status"} && $account->{"ise_status"} ne "fa-close text-danger" ? " checked" : "";
-      $ise_toggle{$target} = $account->{"ise_status"} && $account->{"ise_status"} ne "fa-close text-danger" ? " checked" : "";
+      $ise_toggle{$target} = $account->{"ise"} && $account->{"ise"} ne "fa-close text-danger" ? " checked" : "";
     }
     
     if ($sources->{$target} eq "Intermapper")
@@ -136,18 +164,17 @@ sub show { # GET /accounts/123 - show account with id 123
       my $imidgroups = {};
 
       while (my $accountgroup = $query_rs->next)
-      { my (@groups) = split(/\,/,$accountgroup->groups);
+      { my (@groups) = split(/\,/,$accountgroup->groups) if $accountgroup->groups;
         for my $name (@groups)
-        { $imidgroups->{$name}{"name"} = $name;
-          $imidgroups->{$name}{"selected"} = " selected" if $account->{"intermapper_groups"} && $account->{"intermapper_groups"} eq $name;
+        { $imidgroups->{$accountgroup->source->id}{$name}{"name"} = $name;
+          $imidgroups->{$accountgroup->source->id}{$name}{"selected"} = " selected" if $account->{"intermapper_groups"} && $account->{"intermapper_groups"} eq $name;
         }
       } 
       $self->stash(imidgroups => $imidgroups);
       #my $im_toggle = $account->{"intermapper_status"} && $account->{"intermapper_status"} ne "fa-close text-danger" ? " checked" : "";
-      $im_toggle{$target} = $account->{"intermapper_status"} && $account->{"intermapper_status"} ne "fa-close text-danger" ? " checked" : "";
+      $im_toggle{$target} = $account->{"intermapper"} && $account->{"intermapper"} ne "fa-close text-danger" ? " checked" : "";
     }
   }
-  #$self->app->log->debug(Dumper \%acs_toggle);
   $self->stash(acs_toggle => \%acs_toggle);
   $self->stash(ise_toggle => \%ise_toggle);
   $self->stash(im_toggle => \%im_toggle);
@@ -171,12 +198,12 @@ sub index { # GET /accounts - list of all accounts
   $self->consolidate();
   my $filter = $self->param('filter');
   my %accounts = %{ $accounts };
-  my %status = {};
+  my %status = ();
   for my $account (keys %accounts)
   { #for my $key (qw(acs ise ad ldap nagios hpna intermapper cacti))
     for my $key (qw(acs ise intermapper))
     { #$accounts->{$account}{"$key"} = ($accounts->{$account}{"$key"} && $accounts->{$account}{"$key"} ne "fa-close text-danger") ? "fa-check text-success" : "fa-close text-danger";
-      $status{$account}{$key} = ($accounts->{$account}{"$key"} && $accounts->{$account}{"$key"} ne "fa-close text-danger") ? "fa-check text-success" : "fa-close text-danger";
+      $status{$account}{$key} = ($accounts->{$account}{$key} && $accounts->{$account}{$key} ne "fa-close text-danger") ? "fa-check text-success" : "fa-close text-danger";
     }
   }
   $self->stash(accounts => $accounts);
@@ -188,7 +215,7 @@ sub index { # GET /accounts - list of all accounts
     my %filteraccounts = ();
     @filteraccounts{@keys} = @accounts{@keys};
     $self->stash(accounts => \%filteraccounts);
-    $filterheader = "$self->items->{$filter} Accounts - ";
+    $filterheader = $self->items->{$filter}->type->shortname ." Accounts - ";
   } else
   {  $self->stash(accounts => $accounts); }
   my $username = $self->session('username');
@@ -197,7 +224,6 @@ sub index { # GET /accounts - list of all accounts
   $self->stash(items => $self->items);
   $self->stash(filterheader => $filterheader);
   $filter = "?filter=$filter" if $filter;
-
   $self->stash(filter => $filter);
   $self->render('accounts/index', layout => 'accounts');
 }
@@ -205,22 +231,14 @@ sub index { # GET /accounts - list of all accounts
 sub create { # POST /accounts - create new account
   my $self = shift;
   $self->redirect_to('/login/') if !$self->session('logged_in');  
-  my $name = $self->param("name");
-  my $password = $self->param("password");
-  my $authentication = $self->param("authentication");  
 
+  my $param = $self->req->params->names;
+  my @paramnames = @{$param};
+    
   # Temporary fix - Implement UID generation too! TODO
   my $amax = $self->db->resultset('Account')->get_column('Id');
   my $amaxid = $amax->max;
   $amaxid++;
-
-  $self->db->resultset('Account')->create({
-            name => $name,
-            password => $password,
-            id => $amaxid,
-            uid => $amaxid, # TODO: This may need to be fixed
-            authentication => $authentication,
-        });
 
   my $acs_rs = $self->db->resultset('DsAcsUser');
   my $query_rs = $acs_rs->search({ name => "__default" });
@@ -234,178 +252,28 @@ sub create { # POST /accounts - create new account
   $query_rs = $ise_rs->search({ name => "__default" });
   my $defaultise = $query_rs->first;
 
-  # Temporary fix
-  my $immax = $self->db->resultset('DsIntermapperUser')->get_column('Id');
-  my $immaxid = $immax->max;
-  $immaxid++;
-  
-  # Temporary fix
-  my $acsmax = $self->db->resultset('DsAcsUser')->get_column('Id');
-  my $acsmaxid = $acsmax->max;
-  $acsmaxid++;
-  
-  # Temporary fix
-  my $isemax = $self->db->resultset('DsIseInternaluser')->get_column('Id');
-  my $isemaxid = $isemax->max;
-  $isemaxid++;
-
-  my $acs_toggle = $self->param("acs_toggle") || "0";
-  my $ise_toggle = $self->param("ise_toggle") || "0";
-  my $im_toggle = $self->param("im_toggle") || "0";
-  
-  my $acs_password = $self->param("acs_password") || $password;
-  my $acs_enabled = $self->param("acs_enabled");
-  my $acs_description = $self->param("acs_description");
-  my $acs_identitygroupname = $self->param("acs_identitygroupname");
-  my $acs_enablepassword = $self->param("acs_enablepassword");
-  my $acs_passwordneverexpires = $self->param("acs_passwordneverexpires");
-  my $acs_dateexceedsenabled = $self->param("acs_dateexceedsenabled");
-  my $acs_dateexceeds = $self->param("acs_dateexceeds");
-  my $acs_passwordtype = $self->param("acs_passwordtype");
-  
-  my $encpassword = encode_base64($self->cipher->encrypt($self->salt.$password.$name));
-  my $encacspassword = encode_base64($self->cipher->encrypt($self->salt.$acs_password.$name));
-    
-  my $auth_rs = $self->db->resultset('Authentication');
-  $query_rs = $acs_rs->search;
-  my $authgroups = { "0" => { "hostname" => "Local", "type" => '-' } };
-  
-  while (my $authgroup = $query_rs->next)
-  { $authgroups->{$authgroup->id}{"name"} = $authgroup->hostname;
-    $authgroups->{$authgroup->id}{"type"} = $authgroup->type;
-  }
-  $authgroups->{"0"}{"selected"} = " selected";  
-  $self->stash(authgroups => $authgroups);
-    
-  # Need to store full datetime instead of date
-  my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-  $mon++;
-  $year += 1900;  
-  my $created = "$mday/$mon/$year";
-  my $lastmodified = "$mday/$mon/$year";
-  
-  my $sources_rs = $self->db->resultset('DsSource');
-  $query_rs = $sources_rs->search;
-  my $sources = {};
-
-  while (my $source = $query_rs->next)
-  { $sources->{$source->type->id} = $source->type->shortname;
-  }
-  
-  if ($defaultacs)
-  { $acs_enabled ||= $defaultacs->enabled;  
-    $acs_description ||= $defaultacs->description;
-    $acs_identitygroupname ||= $defaultacs->identitygroupname;
-    $acs_enablepassword ||= $defaultacs->enablepassword;
-    $acs_passwordneverexpires ||=  $defaultacs->passwordneverexpires;
-    $acs_dateexceedsenabled ||= $defaultacs->dateexceedsenabled;
-    $acs_dateexceeds ||=  $defaultacs->dateexceeds;
-    $acs_passwordtype ||= $defaultacs->passwordtype;
-  }
-
-  if ($acs_toggle)
-  { $self->db->resultset('DsAcsUser')->create(
-      { enabled => $acs_enabled, description => $acs_description, identitygroupname => $acs_identitygroupname,
-        enablepassword => $acs_enablepassword, passwordneverexpires => $acs_passwordneverexpires,
-        dateexceedsenabled => $acs_dateexceedsenabled, dateexceeds => $acs_dateexceeds, passwordtype => $acs_passwordtype,
-        name => $name, password => $acs_password, id => $acsmaxid, status => $status_created,
-        # TODO Add support for UID!
-        #source => 
-      });
-  }
-  
-  my $ise_password = $self->param("ise_password") || $password;
-  my $ise_enabled = $self->param("ise_enabled");
-  my $ise_firstname = $self->param("ise_firstname");
-  my $ise_lastname = $self->param("ise_lastname"); 
-  my $ise_identitygroups = $self->param("ise_identitygroups");
-  my $ise_email = $self->param("ise_email");
-  my $ise_enablepassword = $self->param("ise_enablepassword");
-  my $ise_changepassword = $self->param("ise_changepassword");
-  my $ise_expirydateenabled = $self->param("ise_expirydateenabled");
-  my $ise_expirydate = $self->param("ise_expirydate");
-  my $ise_passwordidstore = $self->param("ise_passwordidstore");
-
-  if ($defaultise) 
-  { $ise_enabled ||= $defaultise->enabled;
-    $ise_firstname ||= $defaultise->firstname;
-    $ise_lastname ||= $defaultise->lastname; 
-    $ise_identitygroups ||= $defaultise->identitygroups;
-    $ise_email ||= $defaultise->email;  
-    $ise_enablepassword ||= $defaultise->enablepassword;
-    $ise_changepassword ||= $defaultise->changepassword;
-    $ise_expirydateenabled ||= $defaultise->expirydateenabled;
-    $ise_expirydate ||= $defaultise->expirydate;
-    $ise_passwordidstore ||= $defaultise->passwordidstore;
-  }
-
-  my $encisepassword = encode_base64($self->cipher->encrypt($self->salt.$ise_password.$name));
-
-  if ($ise_toggle)
-  {  $self->db->resultset('DsIseInternaluser')->create(
-        { enabled => $ise_enabled, firstname => $ise_firstname, lastname => $ise_lastname,
-          identitygroups => $ise_identitygroups, email => $ise_email, enablepassword => $ise_enablepassword,
-          changepassword => $ise_changepassword, expirydateenabled => $ise_expirydateenabled, expirydate=> $ise_expirydate,
-          passwordidstore => $ise_passwordidstore, name => $name, password => $encisepassword, id => $isemaxid, status => $status_created,
-          # TODO Add support for UID!
-        });
-  }
-  my $im_password = $self->param("im_password") || $password;  
-  my $intermapper_groups = $self->param("intermapper_groups");
-  my $intermapper_guest = $self->param("intermapper_guest");
-  my $intermapper_external = $self->param("intermapper_external");
-  
-  my $encimpassword = encode_base64($self->cipher->encrypt($self->salt.$im_password.$name));  
-  
-  if ($defaultintermapper)
-  { $intermapper_groups ||= $defaultintermapper->groups;
-    $intermapper_guest ||= $defaultintermapper->guest;
-    $intermapper_external ||= $defaultintermapper->external;
-  }
-  if ($im_toggle)
-  {  $self->db->resultset('DsIntermapperUser')->create(
-    { groups => $intermapper_groups, external => $intermapper_external, guest => $intermapper_guest,
-      name => $name, password => $encimpassword, id => $immaxid, status => $status_created,
-      # TODO Add support for UID!
-    });
-  }
-  
-  $self->redirect_to("/accounts/");
-}
-
-sub update { # PUT /accounts/123 - update a account
-  my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
-  my $id = $self->param("id");
-
-  my $param = $self->req->params->names;
-  my @paramnames = @{$param};
-
-  # Accounts table update is REQUIRED STILL!!
-  # Temporary fix
-  my $immax = $self->db->resultset('DsIntermapperUser')->get_column('Id');
-  my $immaxid = $immax->max;
-  # TODO Add support for UID!
-  #$immaxid++;
-  # BUG
-  # Intermapper IDs are random IDs
-  
-  # Temporary fix
-  my $isemax = $self->db->resultset('DsIseIdentitygroup')->get_column('Id');
-  my $isemaxid = $isemax->max;
-  $isemaxid++;  
-
   my @acs_uid = @{ $self->every_param('acs_uid') };
   my @ise_uid = @{ $self->every_param('ise_uid') };
   my @im_uid = @{ $self->every_param('im_uid') };
+  
+  my $acs_toggle = $self->param("acs_toggle") || "0";
+  my $ise_toggle = $self->param("ise_toggle") || "0";
   my $im_toggle = $self->param("im_toggle") || "0";
   my $password = $self->param("password");
   my $authentication = $self->param("authentication");
   my $name = $self->param("name");
   my $encpassword = encode_base64($self->cipher->encrypt($self->salt.$password.$name));
-  
+
+  $self->db->resultset('Account')->create({
+            name => $name,
+            password => $password,
+            id => $amaxid,
+            uid => $amaxid, # TODO: This may need to be fixed
+            authentication => $authentication,
+        });
+   
   for my $uid (@acs_uid)
-  { if ($uid =~ /\-X$/) { $uid = ""; next; }
+  { my ($source) = $uid =~ /^(.*?)\-X$/;
     my $acs_toggle = $self->param("acs_toggle_".$uid) || "0";
     my $acs_password = $self->param("acs_password_".$uid) || $password;
     my $encacspassword = encode_base64($self->cipher->encrypt($self->salt.$acs_password.$name));
@@ -417,15 +285,15 @@ sub update { # PUT /accounts/123 - update a account
     my $acs_passwordneverexpires = $self->param("acs_passwordneverexpires_".$uid);
     my $acs_dateexceedsenabled = $self->param("acs_dateexceedsenabled_".$uid);
     my $acs_dateexceeds = $self->param("acs_dateexceeds_".$uid);
-    my $acs_passwordtype = $self->param("acs_passwordtype_".$uid);
-
-    my $acs_rs = $self->db->resultset('DsAcsUser');
-    my $query_rs = $acs_rs->search({ uid => $uid });
-    $encacspassword = $acs_password eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->password : $encacspassword;
-    $acs_encenablepassword = $acs_enablepassword eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->enablepassword : $acs_enablepassword;
-    
+    my $acs_passwordtype = $self->param("acs_passwordtype_".$uid);      
+         
     my $checksum = md5_hex($name.$encacspassword.$acs_enabled.$acs_description.$acs_identitygroupname.$acs_enablepassword.$acs_passwordneverexpires.$acs_dateexceedsenabled.
                          $acs_dateexceeds.$acs_passwordtype);
+  
+    # Temporary fix
+    my $acsmax = $self->db->resultset('DsAcsUser')->get_column('Id');
+    my $acsmaxid = $acsmax->max;
+    $acsmaxid++;
   
     # Need to store full datetime instead of date
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
@@ -434,7 +302,19 @@ sub update { # PUT /accounts/123 - update a account
     my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec); 
     my $lastmodified = "$months[$mon] $mday $year $hour:$min:$sec";
     my $created = "$months[$mon] $mday $year $hour:$min:$sec";
-  
+    $uid = "$source-$acsmaxid";
+    my $id = $name;
+    if ($defaultacs)
+    { $acs_enabled ||= $defaultacs->enabled;  
+      $acs_description ||= $defaultacs->description;
+      $acs_identitygroupname ||= $defaultacs->identitygroupname;
+      $acs_enablepassword ||= $defaultacs->enablepassword;
+      $acs_passwordneverexpires ||=  $defaultacs->passwordneverexpires;
+      $acs_dateexceedsenabled ||= $defaultacs->dateexceedsenabled;
+      $acs_dateexceeds ||=  $defaultacs->dateexceeds;
+      $acs_passwordtype ||= $defaultacs->passwordtype;
+    }
+
     if ($uid && $acs_toggle)
     { $accounts->{$id}{"acs"}{$uid}{"enabled"} = $acs_enabled;
       $accounts->{$id}{"acs"}{$uid}{"description"} = $acs_description;
@@ -446,39 +326,19 @@ sub update { # PUT /accounts/123 - update a account
       $accounts->{$id}{"acs"}{$uid}{"passwordtype"} = $acs_passwordtype;
       $accounts->{$id}{"acs"}{$uid}{"lastmodified"} = $lastmodified;
       $accounts->{$id}{"acs"}{$uid}{"password"} = $encacspassword;
-    
-      $query_rs->first->update({ enabled => $acs_enabled, description => $acs_description, identitygroupname => $acs_identitygroupname,
-                       enablepassword => $acs_encenablepassword, passwordneverexpires => $acs_passwordneverexpires,
-                       dateexceedsenabled => $acs_dateexceedsenabled, dateexceeds => $acs_dateexceeds, passwordtype => $acs_passwordtype,
-                       name => $name, password => $encacspassword, status => $status_changed, lastmodified => $lastmodified, checksum => $checksum
-                    });
-    }
-    if (!$uid && $acs_toggle) # TODO: UID is, at this point, ALWAYS defined!!
-    { if ($acs_enabled || $acs_description || $acs_identitygroupname || $acs_encenablepassword || $acs_passwordneverexpires || $acs_dateexceedsenabled ||
-          $acs_dateexceeds || $acs_passwordtype)
-      { $self->db->resultset('DsAcsUser')->create(
+
+      $self->db->resultset('DsAcsUser')->create(
         { enabled => $acs_enabled, description => $acs_description, identitygroupname => $acs_identitygroupname,
-          enablepassword => $acs_encenablepassword, passwordneverexpires => $acs_passwordneverexpires,
-          dateexceedsenabled => $acs_dateexceedsenabled, dateexceeds => $acs_dateexceeds, passwordtype => $acs_passwordtype, checksum => $checksum,
-          name => $name, password => $encacspassword, status => $status_created, id => $immaxid, lastmodified => $lastmodified, created => $created
+          enablepassword => $acs_enablepassword, passwordneverexpires => $acs_passwordneverexpires,
+          dateexceedsenabled => $acs_dateexceedsenabled, dateexceeds => $acs_dateexceeds, passwordtype => $acs_passwordtype,
+          name => $name, password => $acs_password, id => $acsmaxid, status => $status_created, source=> $source,
+          uid => $uid, id => $acsmaxid, lastmodified => $lastmodified, created => $created
         });
-        $accounts->{$uid}{"acs_created"} = $created;
-      }
-    }
-  
-    if ($uid && !$acs_toggle)  
-    { my $acs_rs = $self->db->resultset('DsAcsUser');
-      my $query_rs = $acs_rs->search({ uid => $uid });
-      #$query_rs->delete;
-      $query_rs->first->update(status => $status_deleted );
-      delete($acsaccounts->{$uid});
-      # TODO Add support for delete flag & remove hash delete
-      $accounts->{$uid}{"acs"} = 0;
     }
   }
   
   for my $uid (@ise_uid)
-  { if ($uid =~ /\-X$/) { $uid = ""; next; }
+  { my ($source) = $uid =~ /^(.*?)\-X$/;
     my $ise_toggle = $self->param("ise_toggle_".$uid) || "0";
     my $ise_password = $self->param("ise_password_".$uid) || $password;
     my $encisepassword = encode_base64($self->cipher->encrypt($self->salt.$ise_password.$name));
@@ -489,18 +349,34 @@ sub update { # PUT /accounts/123 - update a account
     my $ise_email = $self->param("ise_email_".$uid);  
     my $ise_enablepassword = $self->param("ise_enablepassword_".$uid);
     my $ise_encenablepassword = encode_base64($self->cipher->encrypt($self->salt.$ise_enablepassword.$name));
+    my $id = $name;
 
-    my $ise_rs = $self->db->resultset('DsIseInternaluser');
-    my $query_rs = $ise_rs->search({ uid => $uid });
-    $encisepassword = $ise_password eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->password : $encisepassword;
-    $ise_encenablepassword = $ise_enablepassword eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->enablepassword : $ise_enablepassword;
-        
+    # Temporary fix
+    my $isemax = $self->db->resultset('DsIseInternaluser')->get_column('Id');
+    my $isemaxid = $isemax->max;
+    $isemaxid++;
+
+    $uid = "$source-$isemaxid";
     my $ise_changepassword = $self->param("ise_changepassword");
     my $ise_expirydateenabled = $self->param("ise_expirydateenabled");
     my $ise_expirydate = $self->param("ise_expirydate");
     my $ise_passwordidstore = $self->param("ise_passwordidstore");
     my $checksum = md5_hex($name.$encisepassword.$ise_enabled.$ise_firstname.$ise_lastname.$ise_identitygroups.$ise_email.$ise_encenablepassword.
                       $ise_changepassword.$ise_expirydateenabled.$ise_expirydate.$ise_passwordidstore);
+
+    if ($defaultise) 
+    { $ise_enabled ||= $defaultise->enabled;
+      $ise_firstname ||= $defaultise->firstname;
+      $ise_lastname ||= $defaultise->lastname; 
+      $ise_identitygroups ||= $defaultise->identitygroups;
+      $ise_email ||= $defaultise->email;  
+      $ise_enablepassword ||= $defaultise->enablepassword;
+      $ise_changepassword ||= $defaultise->changepassword;
+      $ise_expirydateenabled ||= $defaultise->expirydateenabled;
+      $ise_expirydate ||= $defaultise->expirydate;
+      $ise_passwordidstore ||= $defaultise->passwordidstore;
+    }
+
     if ($uid && $ise_toggle)
     { $accounts->{$id}{"ise"}{$uid}{"enabled"} = $ise_enabled;
       $accounts->{$id}{"ise"}{$uid}{"firstname"} = $ise_firstname;
@@ -513,6 +389,198 @@ sub update { # PUT /accounts/123 - update a account
       $accounts->{$id}{"ise"}{$uid}{"expirydate"} = $ise_expirydate;
       $accounts->{$id}{"ise"}{$uid}{"passwordidstore"} = $ise_passwordidstore;
       $accounts->{$id}{"ise"}{$uid}{"password"} = $encisepassword;
+  
+      my $encisepassword = encode_base64($self->cipher->encrypt($self->salt.$ise_password.$name));
+
+      $self->db->resultset('DsIseInternaluser')->create(
+          { enabled => $ise_enabled, firstname => $ise_firstname, lastname => $ise_lastname,
+            identitygroups => $ise_identitygroups, email => $ise_email, enablepassword => $ise_encenablepassword,
+            changepassword => $ise_changepassword, expirydateenabled => $ise_expirydateenabled, expirydate=> $ise_expirydate,
+            passwordidstore => $ise_passwordidstore, name => $name, password => $encisepassword, status => $status_created,
+            id => $isemaxid, checksum => $checksum, source => $source, uid => $uid,
+          });
+    }
+  }
+  
+  for my $uid (@im_uid)  
+  { my $im_password = $self->param("intermapper_password_".$uid) || $password;
+    my $encimpassword = encode_base64($self->cipher->encrypt($self->salt.$im_password.$name));
+
+    my $intermapper_groups = $self->param("intermapper_groups_".$uid);
+    my $intermapper_guest = $self->param("intermapper_guest_".$uid);
+    my $intermapper_external = $self->param("intermapper_external_".$uid);
+    my $checksum = md5_hex($name.$encimpassword.$intermapper_groups.$intermapper_guest.$intermapper_external);
+    my $id = $name;
+    if ($defaultintermapper)
+    { $intermapper_groups ||= $defaultintermapper->groups;
+      $intermapper_guest ||= $defaultintermapper->guest;
+      $intermapper_external ||= $defaultintermapper->external;
+    }
+
+    # Temporary fix
+    my @chars = ("A".."Z", "a".."z","0".."9");
+    my $immaxid;
+    $immaxid .= $chars[rand @chars] for 1..8;
+    
+    if ($uid && $im_toggle)
+    { my ($source) = $uid =~ /^(.*?)\-X$/;
+      $accounts->{$id}{"intermapper"}{$uid}{"groups"} = $intermapper_groups;
+      $accounts->{$id}{"intermapper"}{$uid}{"guest"} = $intermapper_guest;
+      $accounts->{$id}{"intermapper"}{$uid}{"external"} = $intermapper_external;
+      $accounts->{$id}{"intermapper"}{$uid}{"password"} = $encimpassword;
+      $uid = "$source-$immaxid";
+
+      $self->db->resultset('DsIntermapperUser')->create(
+      { groups => $intermapper_groups, external => $intermapper_external, guest => $intermapper_guest,
+        name => $name, password => $encimpassword, status => $status_created, id => $immaxid, checksum => $checksum,
+        source => $source, uid => $uid
+       });
+    }
+  }
+  $self->redirect_to("/accounts/");
+}
+
+sub update { # PUT /accounts/123 - update a account
+  my $self = shift;
+  $self->redirect_to('/login/') if !$self->session('logged_in');
+  my $id = $self->param("id");
+
+  my $param = $self->req->params->names;
+  my @paramnames = @{$param};
+
+  my @acs_uid = @{ $self->every_param('acs_uid') };
+  my @ise_uid = @{ $self->every_param('ise_uid') };
+  my @im_uid = @{ $self->every_param('im_uid') };
+  my $password = $self->param("password");
+  my $authentication = $self->param("authentication");
+  my $name = $self->param("name");
+  my $encpassword = encode_base64($self->cipher->encrypt($self->salt.$password.$name));
+  for my $uid (@acs_uid)
+  { my $acs_toggle = $self->param("acs_toggle_".$uid) || "0";
+    my $acs_password = $self->param("acs_password_".$uid) || $password;
+    my $encacspassword = encode_base64($self->cipher->encrypt($self->salt.$acs_password.$name));
+    my $acs_enabled = $self->param("acs_enabled_".$uid);  
+    my $acs_description = $self->param("acs_description_".$uid);
+    my $acs_identitygroupname = $self->param("acs_identitygroupname_".$uid);
+    my $acs_enablepassword = $self->param("acs_enablepassword_".$uid);
+    my $acs_encenablepassword = encode_base64($self->cipher->encrypt($self->salt.$acs_enablepassword.$name));
+    my $acs_passwordneverexpires = $self->param("acs_passwordneverexpires_".$uid);
+    my $acs_dateexceedsenabled = $self->param("acs_dateexceedsenabled_".$uid);
+    my $acs_dateexceeds = $self->param("acs_dateexceeds_".$uid);
+    my $acs_passwordtype = $self->param("acs_passwordtype_".$uid);
+  
+    # Need to store full datetime instead of date
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    $mon++;
+    $year += 1900;  
+    my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec); 
+    my $lastmodified = "$months[$mon] $mday $year $hour:$min:$sec";
+    my $created = "$months[$mon] $mday $year $hour:$min:$sec";
+
+    # Temporary fix
+    my $acsmax = $self->db->resultset('DsAcsUser')->get_column('Id');
+    my $acsmaxid = $acsmax->max;
+    $acsmaxid++;
+    my ($source) = $uid =~ /^(.*?)\-X$/;
+    if ($uid =~ /\-X$/) { $uid = ""; }
+    if ($uid && $acs_toggle)
+    { $accounts->{$id}{"acs"}{$uid}{"enabled"} = $acs_enabled;
+      $accounts->{$id}{"acs"}{$uid}{"description"} = $acs_description;
+      $accounts->{$id}{"acs"}{$uid}{"identitygroupname"} = $acs_identitygroupname;
+      $accounts->{$id}{"acs"}{$uid}{"enablepassword"} = $acs_encenablepassword;
+      $accounts->{$id}{"acs"}{$uid}{"passwordneverexpires"} = $acs_passwordneverexpires;
+      $accounts->{$id}{"acs"}{$uid}{"dateexceedsenabled"} = $acs_dateexceedsenabled;
+      $accounts->{$id}{"acs"}{$uid}{"dateexceeds"} = $acs_dateexceeds;
+      $accounts->{$id}{"acs"}{$uid}{"passwordtype"} = $acs_passwordtype;
+      $accounts->{$id}{"acs"}{$uid}{"lastmodified"} = $lastmodified;
+      $accounts->{$id}{"acs"}{$uid}{"password"} = $encacspassword;
+      my $acs_rs = $self->db->resultset('DsAcsUser');
+      my $query_rs = $acs_rs->search({ uid => $uid });
+
+      $encacspassword = $acs_password eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->password : $encacspassword;
+      $acs_encenablepassword = $acs_enablepassword eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->enablepassword : $acs_enablepassword;
+
+      # TODO Checksum needs to be implemented properly  
+      my $checksum = md5_hex($name.$encacspassword.$acs_enabled.$acs_description.$acs_identitygroupname.$acs_enablepassword.$acs_passwordneverexpires.$acs_dateexceedsenabled.
+                         $acs_dateexceeds.$acs_passwordtype);
+
+      $query_rs->first->update({ enabled => $acs_enabled, description => $acs_description, identitygroupname => $acs_identitygroupname,
+                       enablepassword => $acs_encenablepassword, passwordneverexpires => $acs_passwordneverexpires,
+                       dateexceedsenabled => $acs_dateexceedsenabled, dateexceeds => $acs_dateexceeds, passwordtype => $acs_passwordtype,
+                       name => $name, password => $encacspassword, status => $status_changed, lastmodified => $lastmodified, checksum => $checksum
+                    });
+    }
+    if (!$uid && $acs_toggle) # TODO: UID is, at this point, ALWAYS defined!!
+    { if ($acs_enabled || $acs_description || $acs_identitygroupname || $acs_encenablepassword || $acs_passwordneverexpires || $acs_dateexceedsenabled ||
+          $acs_dateexceeds || $acs_passwordtype)
+      { my $checksum = md5_hex($name.$encacspassword.$acs_enabled.$acs_description.$acs_identitygroupname.$acs_enablepassword.$acs_passwordneverexpires.$acs_dateexceedsenabled.
+                         $acs_dateexceeds.$acs_passwordtype);
+        # TODO Checksum needs to be properly implemented
+        $uid = "$source-$acsmaxid";
+        $self->db->resultset('DsAcsUser')->create(
+        { enabled => $acs_enabled, description => $acs_description, identitygroupname => $acs_identitygroupname,
+          enablepassword => $acs_encenablepassword, passwordneverexpires => $acs_passwordneverexpires, uid => $uid,
+          dateexceedsenabled => $acs_dateexceedsenabled, dateexceeds => $acs_dateexceeds, passwordtype => $acs_passwordtype, checksum => $checksum,
+          name => $name, password => $encacspassword, status => $status_created, id => $acsmaxid, lastmodified => $lastmodified, created => $created
+        });
+        $accounts->{$uid}{"acs_created"} = $created; # Confirm this?!?
+      }
+    }
+  
+    if ($uid && !$acs_toggle)  
+    { my $acs_rs = $self->db->resultset('DsAcsUser');
+      my $query_rs = $acs_rs->search({ uid => $uid });
+      #$query_rs->delete;
+      $query_rs->first->update({status => $status_deleted});
+      delete($acsaccounts->{$uid});
+      # TODO Add support for delete flag & remove hash delete
+      $accounts->{$uid}{"acs"} = 0;
+    }
+  }
+  
+  for my $uid (@ise_uid)
+  { my $ise_toggle = $self->param("ise_toggle_".$uid) || "0";
+    my $ise_password = $self->param("ise_password_".$uid) || $password;
+    my $encisepassword = encode_base64($self->cipher->encrypt($self->salt.$ise_password.$name));
+    my $ise_enabled = $self->param("ise_enabled_".$uid);
+    my $ise_firstname = $self->param("ise_firstname_".$uid);
+    my $ise_lastname = $self->param("ise_lastname_".$uid); 
+    my $ise_identitygroups = $self->param("ise_identitygroups_".$uid);
+    my $ise_email = $self->param("ise_email_".$uid);  
+    my $ise_enablepassword = $self->param("ise_enablepassword_".$uid);
+    my $ise_encenablepassword = encode_base64($self->cipher->encrypt($self->salt.$ise_enablepassword.$name));
+    
+    # Temporary fix
+    my $isemax = $self->db->resultset('DsIseIdentitygroup')->get_column('Id');
+    my $isemaxid = $isemax->max;
+    $isemaxid++;  
+        
+    my $ise_changepassword = $self->param("ise_changepassword");
+    my $ise_expirydateenabled = $self->param("ise_expirydateenabled");
+    my $ise_expirydate = $self->param("ise_expirydate");
+    my $ise_passwordidstore = $self->param("ise_passwordidstore");
+    my ($source) = $uid =~ /^(.*?)\-X$/;
+    if ($uid =~ /\-X$/) { $uid = ""; }
+    if ($uid && $ise_toggle)
+    { $accounts->{$id}{"ise"}{$uid}{"enabled"} = $ise_enabled;
+      $accounts->{$id}{"ise"}{$uid}{"firstname"} = $ise_firstname;
+      $accounts->{$id}{"ise"}{$uid}{"lasttname"} = $ise_lastname;    
+      $accounts->{$id}{"ise"}{$uid}{"identitygroups"} = $ise_identitygroups;
+      $accounts->{$id}{"ise"}{$uid}{"email"} = $ise_email;    
+      $accounts->{$id}{"ise"}{$uid}{"enablepassword"} = $ise_encenablepassword;
+      $accounts->{$id}{"ise"}{$uid}{"changepassword"} = $ise_changepassword;
+      $accounts->{$id}{"ise"}{$uid}{"expirydateenabled"} = $ise_expirydateenabled;
+      $accounts->{$id}{"ise"}{$uid}{"expirydate"} = $ise_expirydate;
+      $accounts->{$id}{"ise"}{$uid}{"passwordidstore"} = $ise_passwordidstore;
+      $accounts->{$id}{"ise"}{$uid}{"password"} = $encisepassword;
+      my $ise_rs = $self->db->resultset('DsIseInternaluser');
+      my $query_rs = $ise_rs->search({ uid => $uid });
+      $encisepassword = $ise_password eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->password : $encisepassword;
+      $ise_encenablepassword = $ise_enablepassword eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->enablepassword : $ise_enablepassword;
+      
+      my $checksum = md5_hex($name.$encisepassword.$ise_enabled.$ise_firstname.$ise_lastname.$ise_identitygroups.$ise_email.$ise_encenablepassword.
+                      $ise_changepassword.$ise_expirydateenabled.$ise_expirydate.$ise_passwordidstore);
+      # TODO Checksum needs to be implemented properly
       if ($query_rs)
       { $query_rs->first->update({ enabled => $ise_enabled, firstname => $ise_firstname, lastname => $ise_lastname,
                        identitygroups => $ise_identitygroups, email => $ise_email, enablepassword => $ise_encenablepassword,
@@ -525,12 +593,16 @@ sub update { # PUT /accounts/123 - update a account
     if (!$uid && $ise_toggle) # TODO: UID is, at this point, ALWAYS defined!!
     { if ($ise_enabled || $ise_firstname || $ise_lastname || $ise_identitygroups || $ise_email || $ise_encenablepassword ||
           $ise_changepassword || $ise_expirydateenabled || $ise_expirydate || $ise_passwordidstore)
-        { $self->db->resultset('DsIseInternaluser')->create(
+        { my $checksum = md5_hex($name.$encisepassword.$ise_enabled.$ise_firstname.$ise_lastname.$ise_identitygroups.$ise_email.$ise_encenablepassword.
+                      $ise_changepassword.$ise_expirydateenabled.$ise_expirydate.$ise_passwordidstore);
+          $uid = "$source-$isemaxid";
+          # TODO Checksum needs to be implemented properly
+          $self->db->resultset('DsIseInternaluser')->create(
           { enabled => $ise_enabled, firstname => $ise_firstname, lastname => $ise_lastname,
-            identitygroups => $ise_identitygroups, email => $ise_email, enablepassword => $ise_encenablepassword,
-            changepassword => $ise_changepassword, expirydateenabled => $ise_expirydateenabled, expirydate=> $ise_expirydate,
+            identitygroups => $ise_identitygroups, email => $ise_email, enablepassword => $ise_encenablepassword, source => $source,
+            changepassword => $ise_changepassword, expirydateenabled => $ise_expirydateenabled, expirydate=> $ise_expirydate, uid => $uid,
             passwordidstore => $ise_passwordidstore, name => $name, password => $encisepassword, status => $status_created, id => $isemaxid, checksum => $checksum
-          });    
+          });
        }
     }
 
@@ -540,7 +612,7 @@ sub update { # PUT /accounts/123 - update a account
       #$query_rs->delete;
       # TODO Add support for delete flag & remove hash delete
       delete($iseaccounts->{$uid});
-      $query_rs->first->update(status => $status_deleted );
+      $query_rs->first->update({status => $status_deleted});
       $accounts->{$uid}{"ise"} = 0;
     }
   }
@@ -549,21 +621,27 @@ sub update { # PUT /accounts/123 - update a account
   { my $im_password = $self->param("intermapper_password_".$uid) || $password;
     my $encimpassword = encode_base64($self->cipher->encrypt($self->salt.$im_password.$name));
 
-    my $intermapper_rs = $self->db->resultset('DsIntermapperUser');
-    my $query_rs = $intermapper_rs->search({ uid => $uid });
-    $encimpassword = $im_password eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->password : $encimpassword;
-
+    # Intermapper IDs are random IDs
+    my @chars = ("A".."Z", "a".."z","0".."9");
+    my $immaxid;
+    $immaxid .= $chars[rand @chars] for 1..8;
+        
     my $intermapper_groups = $self->param("intermapper_groups_".$uid);
     my $intermapper_guest = $self->param("intermapper_guest_".$uid);
     my $intermapper_external = $self->param("intermapper_external_".$uid);
-    my $checksum = md5_hex($name.$encimpassword.$intermapper_groups.$intermapper_guest.$intermapper_external);
-  
+    my $im_toggle = $self->param("im_toggle_".$uid) || "0";
+    my ($source) = $uid =~ /^(.*?)\-X$/;
+    if ($uid =~ /\-X$/) { $uid = ""; }
     if ($uid && $im_toggle)
-    { if ($uid =~ /\-X$/) { $uid = ""; next; }
-      $accounts->{$uid}{"intermapper_groups"} = $intermapper_groups;
-      $accounts->{$uid}{"intermapper_guest"} = $intermapper_guest;
-      $accounts->{$uid}{"intermapper_external"} = $intermapper_external;
-      $accounts->{$uid}{"intermapper_password"} = $encimpassword;
+    { $accounts->{$id}{"intermapper"}{$uid}{"groups"} = $intermapper_groups;
+      $accounts->{$id}{"intermapper"}{$uid}{"guest"} = $intermapper_guest;
+      $accounts->{$id}{"intermapper"}{$uid}{"external"} = $intermapper_external;
+      $accounts->{$id}{"intermapper"}{$uid}{"password"} = $encimpassword;
+      my $intermapper_rs = $self->db->resultset('DsIntermapperUser');
+      my $query_rs = $intermapper_rs->search({ uid => $uid });
+      $encimpassword = $im_password eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->password : $encimpassword; 
+      my $checksum = md5_hex($name.$encimpassword.$intermapper_groups.$intermapper_guest.$intermapper_external);
+      # TODO Checksum needs to be properly implemented
 
       $query_rs->first->update({ groups => $intermapper_groups, external => $intermapper_external, guest => $intermapper_guest,
                       name => $name, password => $encimpassword, status => $status_changed, checksum => $checksum
@@ -572,10 +650,13 @@ sub update { # PUT /accounts/123 - update a account
   
     if (!$uid && $im_toggle)
     { if ($intermapper_groups || $intermapper_guest || $intermapper_external || $im_password )
-      {  $self->db->resultset('DsIntermapperUser')->create(
-          { groups => $intermapper_groups, external => $intermapper_external, guest => $intermapper_guest,
-            name => $name, password => $encimpassword, status => $status_created, id => $immaxid, checksum => $checksum
-         });
+      { my $checksum = md5_hex($name.$encimpassword.$intermapper_groups.$intermapper_guest.$intermapper_external);
+        # TODO Checksum needs to be properly implemented
+        $uid = "$source-$immaxid";
+        $self->db->resultset('DsIntermapperUser')->create(
+        { groups => $intermapper_groups, external => $intermapper_external, guest => $intermapper_guest, uid => $uid, source => $source,
+          name => $name, password => $encimpassword, status => $status_created, id => $immaxid, checksum => $checksum
+        });
       }
     }
   
@@ -583,7 +664,7 @@ sub update { # PUT /accounts/123 - update a account
     { my $intermapper_rs = $self->db->resultset('DsIntermapperUser');
       my $query_rs = $intermapper_rs->search({ uid => $uid });
       #$query_rs->delete;
-      $query_rs->first->update(status => $status_deleted );
+      $query_rs->first->update({status => $status_deleted});
       delete($intermapperaccounts->{$uid});
       # TODO Add support for delete flag & remove hash delete
       $accounts->{$uid}{"intermapper"} = 0;
@@ -598,11 +679,27 @@ sub update { # PUT /accounts/123 - update a account
 
   my $account_rs = $self->db->resultset('Account');
   my $query_rs = $account_rs->search({ name => $id }); 
-  if ($password)
-  { $query_rs->update({ name => $name, password => $encpassword, authentication => $authentication }); }
-  else
-  { $query_rs->update({ name => $name, authentication => $authentication }); }  
-
+  if ($query_rs->first)
+  { if ($password)
+    { $query_rs->update({ name => $name, password => $encpassword, authentication => $authentication }); 
+    }
+    else
+    { $query_rs->update({ name => $name, authentication => $authentication }); 
+    }
+  } else
+  { # Temporary fix - Implement UID generation too! TODO
+    my $amax = $self->db->resultset('Account')->get_column('Id');
+    my $amaxid = $amax->max;
+    $amaxid++;
+	my %account = (name => $id,
+            password => $encpassword,
+            id => $amaxid,
+            uid => $amaxid, # TODO: This may need to be fixed
+            authentication => $authentication,
+			);
+    if ($password eq "PASSWORDHASBEENCHANGED!!") { delete($account{"password"}); }
+    $self->db->resultset('Account')->create(\%account);
+  }
   $self->redirect_to("/accounts/$id");
 }
 
@@ -648,7 +745,6 @@ sub consolidate {
   my $self = shift;
   # Consolidate based on account login..
   $self->redirect_to('/login/') if !$self->session('logged_in');
-  my %datasources = $self->datasources;
   my $sources_rs = $self->db->resultset('DsSource');
   my $query_rs = $sources_rs->search;
   my %sources = ();
@@ -670,7 +766,7 @@ sub consolidate {
   { $acsaccounts->{$account->name}{$account->uid} = $account if $account->name;
     for my $source (keys %sources)
     { $accounts->{$account->name}{"stub_ise"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ISE";
-      $accounts->{$account->name}{"stub_intermapper"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
+      $accounts->{$account->name}{"stub_intermapper" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
     }
   }
   
@@ -680,7 +776,7 @@ sub consolidate {
   { $iseaccounts->{$account->name}{$account->uid} = $account if $account->name;
     for my $source (keys %sources)
     { $accounts->{$account->name}{"stub_acs"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ACS";
-      $accounts->{$account->name}{"stub_intermapper"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
+      $accounts->{$account->name}{"stub_intermapper" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
     }
   }
 
@@ -705,6 +801,7 @@ sub consolidate {
           { $accounts->{$db->{$key}{$uid}->name}{"name"} = $db->{$key}{$uid}->name;
             $accounts->{$db->{$key}{$uid}->name}{"password"} = $db->{$key}{$uid}->password || "";
           }
+          delete($accounts->{$db->{$key}{$uid}->name}{"stub_acs"}{$db->{$key}{$uid}->source->id."-X"});
           $accounts->{$db->{$key}{$uid}->name}{"password"} ||= "";
           #$accounts->{$db->{$key}{$uid}->name}{"acs"} = 1;
           $accounts->{$db->{$key}{$uid}->name}{"acs"}{$uid}{"status"} = 1;
@@ -732,7 +829,8 @@ sub consolidate {
           }
           $accounts->{$db->{$key}{$uid}->name}{"password"} ||= "";
           #$accounts->{$db->{$key}->name}{"intermapper"} = 1;
-          $accounts->{$db->{$key}{$uid}->name}{"intermapper_status"} = 1;
+          delete($accounts->{$db->{$key}{$uid}->name}{"stub_intermapper"}{$db->{$key}{$uid}->source->id."-X"});
+          $accounts->{$db->{$key}{$uid}->name}{"intermapper"}{$uid}{"status"} = 1;
           $accounts->{$db->{$key}{$uid}->name}{"intermapper"}{$uid}{"groups"} = $db->{$key}{$uid}->groups || "";
           $accounts->{$db->{$key}{$uid}->name}{"intermapper"}{$uid}{"external"} = bool($db->{$key}{$uid}->external);
           $accounts->{$db->{$key}{$uid}->name}{"intermapper"}{$uid}{"guest"} = $db->{$key}{$uid}->guest;
@@ -741,13 +839,14 @@ sub consolidate {
           $accounts->{$db->{$key}{$uid}->name}{"intermapper"}{$uid}{"source"} = $db->{$key}{$uid}->source;
           $intermapper{$db->{$key}{$uid}->name} = 1;
           
-          $accounts->{$db->{$key}{$uid}->name}{"stub_intermapper"}{$uid}{"source"} = $db->{$key}{$uid}->source;
+          #$accounts->{$db->{$key}{$uid}->name}{"stub_im"}{$uid}{"source"} = $db->{$key}{$uid}->source;
         }
         if (ref($db->{$key}{$uid}) eq "NG::Schema::Result::DsIseInternaluser")
         { if (!$accounts->{$db->{$key}{$uid}->name}{"name"})
           { $accounts->{$db->{$key}{$uid}->name}{"name"} = $db->{$key}{$uid}->name;
             $accounts->{$db->{$key}{$uid}->name}{"password"} = $db->{$key}{$uid}->password;
           }
+          delete($accounts->{$db->{$key}{$uid}->name}{"stub_ise"}{$db->{$key}{$uid}->source->id."-X"});
           $accounts->{$db->{$key}{$uid}->name}{"password"} ||= "";
           $accounts->{$db->{$key}{$uid}->name}{"ise_status"} = 1;
           $accounts->{$db->{$key}{$uid}->name}{"ise"}{$uid}{"email"} = $db->{$key}{$uid}->email; 
@@ -771,14 +870,14 @@ sub consolidate {
       }
 
       # TODO: FIX THIS AND USE SEPARATE UID TO IDENTIFY CORRECT DATA SOURCE
-      for my $source (keys %datasources)
-      { if (ref($datasources{$source}) eq "Net::Cisco::ACS")
+      for my $source (keys %sources)
+      { if (ref($sources{$source}) eq "Net::Cisco::ACS")
         { #$acs->users(users => \%acs);
         }
-        if (ref($datasources{$source}) eq "Net::Cisco::ISE")
+        if (ref($sources{$source}) eq "Net::Cisco::ISE")
         { #$ise->internalusers(internalusers => \%ise);
         }
-        if (ref($datasources{$source}) eq "Net::Intermapper")
+        if (ref($sources{$source}) eq "Net::Intermapper")
         { #$intermapper->users(\%intermapper);
         }
       }      
@@ -796,12 +895,20 @@ sub synchronize # REVIEW!!
   $self->redirect_to('/login/') if !$self->session('logged_in'); 
   my $filter = $self->param("filter");
   my @mappings = ();
-  
+  my @rules = ();
+  my $syncrules_rs = $self->db->resultset('Syncrule');  
   my $mapping_rs = $self->db->resultset('Mapping');
-  my $query_rs = $mapping_rs->search({ source_table => "Users" });
+  my $query_rs = $syncrules_rs->search({},  { order_by => "priority" });
+  while (my $rule = $query_rs->next)
+  { push(@rules, { source_ds => $rule->source_ds, destination_ds => $rule->destination_ds, priority => $rule->priority, id => $rule->id });
+  }
+  
+  # DBIx::Class is working as designed but obviously some of the fields with S at the end are NOT PLURAL..
+  # I DON'T WANT TO BREAK ANYTHING ELSE BUT REMEMBER TO CHECK THE FIELD NAMES AND USE WITHOUT S AT THE END IF NEEDED!!
+  $query_rs = $mapping_rs->search({ source_table => "Users" });
   while (my $mapping = $query_rs->next)
   { my ($source_ds, $source_table, $source_field, $destination_ds, $destination_table, $destination_field, $create, $append, $overwrite) =
-   ($mapping->source_ds, $mapping->source_table, $mapping->source_field, $mapping->destination_ds, $mapping->destination_table,
+   ($mapping->source_d, $mapping->source_table, $mapping->source_field, $mapping->destination_d, $mapping->destination_table,
     $mapping->destination_field, $mapping->createflag, $mapping->appendflag, $mapping->overwriteflag);
     push(@mappings,
          { source_ds => $source_ds, source_table => $source_table, source_field => $source_field,
@@ -809,124 +916,189 @@ sub synchronize # REVIEW!!
            create => $create, append => $append, overwrite => $overwrite
          });
   }
-  
-  my $acs_rs = $self->db->resultset('DsAcsUser');
-  $query_rs = $acs_rs->search;
-  while (my $account = $query_rs->next)
-  { my %account = $account->get_columns;
-    for my $map (@mappings)
-    { if  ($map->{source_ds} == 1)  # ACS
-      { if (my ($sfield) = $map->{source_field} =~ /^dynamic: (.*)$/) # Source field dynamic - Probably only for name
-        { if (my ($dfield, $dvalue) = $map->{destination_field} =~ /^dynamic: (\S*)\s?(\S*)$/) # Destination field dynamic - Probably only for name
-          { # ACS to Intermapper
-            $sfield =~ s/[\r\n]//g; $dfield =~ s/[\r\n]//g;
-            if ($map->{destination_ds} == 2)
-            { my $intermapper_rs = $self->db->resultset('DsIntermapperUser');
-              my %criteria = (); #($dfield => $account{$sfield});
-              $criteria{"name"} = $account{"name"};
-              my $im_rs = $intermapper_rs->search({ %criteria }); # find all IM records with name matching sourcd DS, create if needed
-              my $empty = 1;
-              while (my $imaccount = $im_rs->next)
-              { if ($map->{"overwrite"} eq "1") # APPEND FUNCTIONALITY TO DO!!
-                { if (!$dvalue)
-                  { $imaccount->update({ $dfield => $account{"$sfield"} }) ; } else
-                  { $dvalue =~ s/\"//g; $imaccount->update({ $dfield => $dvalue }) ; }
-                }
-                $empty = 0;
-              }
-              if ($empty)  # No records matching criteria already exist - insert!
-              { if ($map->{"create"} eq "1") 
-                { $self->db->resultset('DsIntermapperUser')->create({ $dfield => $account{"acs_$sfield"} });
-                }
-              }
-            }
-            # ACS to ISE
-            
-            if ($map->{destination_ds} == 3)
-            { my $ise_rs = $self->db->resultset('DsIseInternaluser');
-              my %criteria = (); #($dfield => $account{$sfield});
-              # if ($sfield ne "name") # Onlu use NAME field!!
-              $criteria{"name"} = $account{"name"}; 
-              my $cise_rs = $ise_rs->search({ %criteria });
-              my $empty = 1;
-              while (my $iseaccount = $cise_rs->next)
-              { if ($map->{"overwrite"} eq "1") # APPEND FUNCTIONALITY TO DO!!
-                { if (!$dvalue)
-                 { $iseaccount->update({ $dfield => $account{"$sfield"} }) ; } else
-                 { $dvalue =~ s/\"//g; $iseaccount->update({ $dfield => $dvalue }) ;
-                 } 
-                }
-                $empty = 0;
-              }
-              if ($empty) 
-              { if ($map->{"create"} eq "1")
-                { $self->db->resultset('DsIseInternaluser')->create({ $dfield => $account{"acs_$sfield"} });
-                }
-              }
-            }
 
-          }
-          
-        } # source_field and destination_field dynamic
-                
-        if (my ($sfield, $svalue) = $map->{source_field} =~ /^static: (.*?) \"(.*?)\"$/) # Source field static - Probably only for name
-        { if (my ($dfield,$dvalue) = $map->{destination_field} =~ /^static: (.*?) \"(.*?)\"$/) # Destination field static - Probably only for name
-          { # ACS to Intermapper
-            if ($map->{destination_ds} == 2)
-            { if ($svalue && $account{"$sfield"} && $account{"$sfield"} eq $svalue)
+  for my $rule (@rules)
+  { my $acs_rs = $self->db->resultset('DsAcsUser');
+    $query_rs = $acs_rs->search;
+    while (my $account = $query_rs->next)
+    { my %account = $account->get_columns;
+      for my $map (@mappings)
+      { if  ($map->{source_ds}->type->shortname eq "ACS")  # ACS
+        { if (my ($sfield) = $map->{source_field} =~ /^dynamic: (.*)$/) # Source field dynamic - Probably only for name
+          { if (my ($dfield, $dvalue) = $map->{destination_field} =~ /^dynamic: (\S*)\s?(\S*)$/) # Destination field dynamic - Probably only for name
+            { # ACS to Intermapper
+              $sfield =~ s/[\r\n]//g; $dfield =~ s/[\r\n]//g;
+              if ($map->{destination_ds}->type->shortname eq "Intermapper")
               { my $intermapper_rs = $self->db->resultset('DsIntermapperUser');
-                my %criteria = ("name" => $account{"name"}); # Find record in IM db matchin name
-                my $im_rs = $intermapper_rs->search({ %criteria });
-                if ($im_rs) # Records matching criteria already exist - only update!
-                { while (my $imaccount = $im_rs->next)
-                  { if ($map->{"append"} eq "1")
-                    { $dvalue = $dvalue && $imaccount->{$dfield} ? $imaccount->{$dfield}.$dvalue : $imaccount->{$dfield};
-                      $imaccount->update({ $dfield => $dvalue }) ;
-                    }
-                    if ($map->{"overwrite"} eq "1")
-                    { $imaccount->update({ $dfield => $dvalue }) ;
-                    }
+                my %criteria = (); #($dfield => $account{$sfield});
+                $criteria{"name"} = $account{"name"};
+                my $im_rs = $intermapper_rs->search({ %criteria }); # find all IM records with name matching sourcd DS, create if needed
+                my $empty = 1;
+                while (my $imaccount = $im_rs->next)
+                { if ($map->{"overwrite"} eq "1") # APPEND FUNCTIONALITY TO DO!!
+                  { if (!$dvalue)
+                    { $imaccount->update({ $dfield => $account{"$sfield"} }) ; } else # TODO Update status and checksum fields
+                    { $dvalue =~ s/\"//g; $imaccount->update({ $dfield => $dvalue }) ; }
+                    # TODO Update status and checksum fields
                   }
-                } else  # No records matching criteria already exist - insert!
-                { if ($map->{"create"} eq "1")
-                  { $self->db->resultset('DsIntermapperUser')->create({ "name" => $account{"name"}, $dfield => $dvalue });
-                  }
+                  $empty = 0;
                 }
-              }
-            }
+                # Temporary fix
+                my @chars = ("A".."Z", "a".."z","0".."9");
+                my $immaxid;
+                $immaxid .= $chars[rand @chars] for 1..8;
 
-            # ACS to ISE
-            if ($map->{destination_ds} == 3)
-            { my $svfield = $account{"$sfield"} || "";
-              if ($svalue eq $svfield)
-              { my $ise_rs = $self->db->resultset('DsIseInternaluser');
-                my %criteria = ("name" => $account{"name"}); # Find record in IM db matchin name
-                my $cise_rs = $ise_rs->search({ %criteria });
-                if ($cise_rs) # Records matching criteria already exist - only update!
-                { while (my $iseaccount = $cise_rs->next)
-                  { if ($map->{"append"} eq "1")
-                    { $dvalue ||= "";
-                      $iseaccount->{$dfield} ||= "";
-                      $iseaccount->update({ $dfield => $iseaccount->{$dfield}.$dvalue }) ;
-                    }
-                    if ($map->{"overwrite"} eq "1")
-                    { $iseaccount->update({ $dfield => $dvalue }) ;
-                    }
+                if ($empty)  # No records matching criteria already exist - insert!
+                { if ($map->{"create"} eq "1") 
+                  { $self->db->resultset('DsIntermapperUser')->create({
+                    uid => $map->{destination_ds}->id."-".$immaxid, id => $immaxid, source => $map->{destination_ds}->id, $dfield => $account{$sfield} });
+                    # TODO Update status and checksum fields
                   }
-                } else  # No records matching criteria already exist - insert!
+                }
+              }
+              
+              # ACS to ISE
+            
+              if ($map->{destination_ds}->type->shortname eq "ISE")
+              { my $ise_rs = $self->db->resultset('DsIseInternaluser');
+                my %criteria = (); #($dfield => $account{$sfield});
+                # if ($sfield ne "name") # Onlu use NAME field!!
+                $criteria{"name"} = $account{"name"};
+                my $cise_rs = $ise_rs->search({ %criteria });
+                my $empty = 1;
+                while (my $iseaccount = $cise_rs->next)
+                { if ($map->{"overwrite"} eq "1") # APPEND FUNCTIONALITY TO DO!!
+                  { if (!$dvalue)
+                   { $iseaccount->update({ $dfield => $account{"$sfield"} }) ; } else # TODO Update status and checksum fields
+                   { $dvalue =~ s/\"//g;
+                     $iseaccount->update({ $dfield => $dvalue }) ;
+                     # TODO Update status and checksum fields
+                   } 
+                  }
+                  $empty = 0;
+                }
+                if ($empty) 
                 { if ($map->{"create"} eq "1")
-                  { $self->db->resultset('DsIseInternaluser')->create({ "name" => $account{"name"}, $dfield => $dvalue });
+                  { # Temporary fix
+                    my $isemax = $self->db->resultset('DsIseInternaluser')->get_column('Id');
+                    my $isemaxid = $isemax->max;
+                    $isemaxid++;
+                    $self->db->resultset('DsIseInternaluser')->create({
+                    uid => $map->{destination_ds}->id."-".$isemaxid, id => $isemaxid, source => $map->{destination_ds}->id, "name" => $account{"name"},
+                    $dfield => $account{"$sfield"}
+                    }); # TODO Update status and checksum fields
+                  }
+                }
+              }
+              
+              if ($map->{destination_ds}->type->shortname eq "ACS")
+              { my $acs_rs = $self->db->resultset('DsAcsUser');
+                my %criteria = (); #($dfield => $account{$sfield});
+                # if ($sfield ne "name") # Only use NAME field!!
+                $criteria{"name"} = $account{"name"}; 
+                my $cacs_rs = $acs_rs->search({ %criteria });
+                my $empty = 1;
+                while (my $acsaccount = $cacs_rs->next)
+                { if ($map->{"overwrite"} eq "1") # APPEND FUNCTIONALITY TO DO!!
+                  { if (!$dvalue)
+                   { $acsaccount->update({ $dfield => $account{"$sfield"} }) ; } else # TODO Update status and checksum fields
+                   { $dvalue =~ s/\"//g; $acsaccount->update({ $dfield => $dvalue }) ;
+                    # TODO Update status and checksum fields
+                   } 
+                  }
+                  $empty = 0;
+                }
+                if ($empty) 
+                { if ($map->{"create"} eq "1")
+                  { $self->db->resultset('DsAcsUser')->create({ $dfield => $account{"$sfield"} });
+                   # TODO Update status and checksum fields
                   }
                 }
               }
             }
-          }
-        } # source_field and destination_field static
+          } # source_field and destination_field dynamic
+                
+          if (my ($sfield, $svalue) = $map->{source_field} =~ /^static: (.*?) \"(.*?)\"$/) # Source field static - Probably only for name
+          { if (my ($dfield,$dvalue) = $map->{destination_field} =~ /^static: (.*?) \"(.*?)\"$/) # Destination field static - Probably only for name
+            { # ACS to Intermapper
+              if ($map->{destination_ds}->type->shortname eq "Intermapper")
+              { if ($svalue && $account{"$sfield"} && $account{"$sfield"} eq $svalue)
+                { my $intermapper_rs = $self->db->resultset('DsIntermapperUser');
+                  my %criteria = ("name" => $account{"name"}); # Find record in IM db matchin name
+                  my $im_rs = $intermapper_rs->search({ %criteria });
+                  if ($im_rs) # Records matching criteria already exist - only update!
+                  { while (my $imaccount = $im_rs->next)
+                    { if ($map->{"append"} eq "1")
+                      { $dvalue = $dvalue && $imaccount->{$dfield} ? $imaccount->{$dfield}.$dvalue : $imaccount->{$dfield};
+                        $imaccount->update({ $dfield => $dvalue }) ;
+                        # TODO Update status and checksum fields
+                      }
+                      if ($map->{"overwrite"} eq "1")
+                      { $imaccount->update({ $dfield => $dvalue }) ;
+                       # TODO Update status and checksum fields
+                      }
+                    } 
+                  } else  # No records matching criteria already exist - insert!
+                  { if ($map->{"create"} eq "1")
+                    { # Temporary fix
+                      my @chars = ("A".."Z", "a".."z","0".."9");
+                      my $immaxid;
+                      $immaxid .= $chars[rand @chars] for 1..8;
+                      $self->db->resultset('DsIntermapperUser')->create(
+                       { uid => $map->{destination_ds}->id."-".$immaxid, id => $immaxid, source => $map->{destination_ds}->id,
+                         "name" => $account{"name"}, $dfield => $dvalue });
+                      # TODO Update status and checksum fields
+                    }
+                  }
+                }
+              }
+
+              # ACS to ISE
+              if ($map->{destination_ds}->type->shortname eq "ISE")
+              { my $svfield = $account{"$sfield"} || "";
+                #if ($svalue eq $svfield)
+                { my $ise_rs = $self->db->resultset('DsIseInternaluser');
+                  my %criteria = ("name" => $account{"name"}); # Find record in ISE db matchin name
+                  my $cise_rs = $ise_rs->search({ %criteria });
+                  if ($cise_rs) # Records matching criteria already exist - only update!
+                  { while (my $iseaccount = $cise_rs->next)
+                    { if ($map->{"append"} eq "1")
+                      { $dvalue ||= "";
+                        $iseaccount->{$dfield} ||= "";
+                        $iseaccount->update({ $dfield => $iseaccount->{$dfield}.$dvalue }) ;
+                        # TODO Update status and checksum fields
+                      }
+                      if ($map->{"overwrite"} eq "1")
+                      { my $ise_rs = $self->db->resultset('DsIseIdentitygroup');
+                        my %criteria = ("name" => $dvalue); 
+                        my $cise_rs = $ise_rs->search({ %criteria });
+                        $dvalue = $cise_rs->first->uid;
+                        $iseaccount->update({ $dfield => $dvalue }) ;
+                        # TODO Update status and checksum fields
+                      }
+                    }
+                  } else  # No records matching criteria already exist - insert!
+                  { if ($map->{"create"} eq "1")
+                    { # Temporary fix
+                      my $isemax = $self->db->resultset('DsIseInternaluser')->get_column('Id');
+                      my $isemaxid = $isemax->max;
+                      $isemaxid++;
+                      $self->db->resultset('DsIseInternaluser')->create({
+                      uid => $map->{destination_ds}->id."-".$isemaxid, id => $isemaxid, source => $map->{destination_ds}->id, "name" => $account{"name"},
+                      $dfield => $dvalue
+                    });
+                      # TODO Update status and checksum fields
+                    }
+                  }
+                }
+              }
+            }
+          }  # source_field and destination_field static
         
-      } # source_ds = 1      
+        } # source_ds = ACS
+      }
     }
   }
-
   if ($filter)
   { $self->redirect_to("/accounts/?filter=$filter");
   } else

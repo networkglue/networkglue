@@ -1,12 +1,12 @@
 use utf8;
-package NG::Schema::Result::Mapping;
+package NG::Schema::Result::Syncrule;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-NG::Schema::Result::Mapping
+NG::Schema::Result::Syncrule
 
 =cut
 
@@ -27,11 +27,11 @@ use base 'DBIx::Class::Core';
 
 __PACKAGE__->load_components("InflateColumn::DateTime");
 
-=head1 TABLE: C<mappings>
+=head1 TABLE: C<syncrules>
 
 =cut
 
-__PACKAGE__->table("mappings");
+__PACKAGE__->table("syncrules");
 
 =head1 ACCESSORS
 
@@ -46,49 +46,15 @@ __PACKAGE__->table("mappings");
   is_foreign_key: 1
   is_nullable: 1
 
-=head2 source_table
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 128
-
-=head2 source_field
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 128
-
 =head2 destination_ds
 
   data_type: 'integer'
   is_foreign_key: 1
   is_nullable: 1
 
-=head2 destination_table
+=head2 priority
 
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 128
-
-=head2 destination_field
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 128
-
-=head2 overwriteflag
-
-  data_type: 'boolean'
-  is_nullable: 1
-
-=head2 appendflag
-
-  data_type: 'boolean'
-  is_nullable: 1
-
-=head2 createflag
-
-  data_type: 'boolean'
+  data_type: 'integer'
   is_nullable: 1
 
 =cut
@@ -98,22 +64,10 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 0 },
   "source_ds",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
-  "source_table",
-  { data_type => "varchar", is_nullable => 1, size => 128 },
-  "source_field",
-  { data_type => "varchar", is_nullable => 1, size => 128 },
   "destination_ds",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
-  "destination_table",
-  { data_type => "varchar", is_nullable => 1, size => 128 },
-  "destination_field",
-  { data_type => "varchar", is_nullable => 1, size => 128 },
-  "overwriteflag",
-  { data_type => "boolean", is_nullable => 1 },
-  "appendflag",
-  { data_type => "boolean", is_nullable => 1 },
-  "createflag",
-  { data_type => "boolean", is_nullable => 1 },
+  "priority",
+  { data_type => "integer", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -171,8 +125,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-04-23 00:11:14
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RgYctMsKI/flRRzccp75Sg
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-04-26 09:52:21
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Aujo5kdAIVwWA2JWTpdtIw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

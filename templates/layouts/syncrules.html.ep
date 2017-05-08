@@ -1,3 +1,4 @@
+</html>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,14 +10,14 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Network Glue - Devices</title>
+    <title>Network Glue - Synchronization Rules</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- DataTable Core CSS -->
     <link href="/css/jquery.dataTables.min.css" rel="stylesheet">
-
+    
     <!-- Custom CSS -->
     <link href="/css/sb-admin.css" rel="stylesheet">
 
@@ -29,7 +30,7 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
- 
+
     <!-- jQuery -->
     <script src="/js/jquery.js"></script>
 
@@ -43,7 +44,7 @@
     <script src="/js/dataTables.select.min.js"></script>
     <script>
         $(document).ready(function(){
-          $('#devicetable').DataTable( {
+        $('#syncruletable').DataTable( {
             colReorder: true,
             responsive: true,
             pageLength: 50,
@@ -58,8 +59,10 @@
         },
         order: [[ 1, 'asc' ]]
                 } );
+
           });
     </script>
+
 <style>
     .dropdown-submenu {
     position: relative;
@@ -109,6 +112,7 @@
     border-radius: 6px 0 6px 6px;
 } 
 </style>
+
 </head>
 
 <body>
@@ -133,7 +137,7 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"> Data <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="/devices/new/"><i class="fa fa-fw fa-plus"></i> Add</a>
+                            <a href="/mappings/new/"><i class="fa fa-fw fa-plus"></i> Add</a>
                         </li>
                         <li class="divider"></li>
                         <li>
@@ -246,7 +250,7 @@
                         <a href="javascript:;" data-toggle="collapse" data-target="#accountgroupsmenu"><i class="fa fa-fw fa-users"></i> Account Groups <i class="fa fa-fw fa-caret-down"></i></a>
                         <ul id="accountgroupsmenu" class="collapse">
                             <li>
-                                <a href="#">All Accounts Groups</a>
+                                <a href="/accountgroups/">All Accounts Groups</a>
                             </li>
                 % foreach my $item (sort keys %{$items}) {                
                             <li>
@@ -255,7 +259,7 @@
 % }
                         </ul>
                     </li>
-<!--                    <li>
+<!--                <li>
                         <a href="javascript:;" data-toggle="collapse" data-target="#devicesmenu"><i class="fa fa-fw fa-tasks"></i> Devices <i class="fa fa-fw fa-caret-down"></i></a>
                         <ul id="devicesmenu" class="collapse">
                             <li>

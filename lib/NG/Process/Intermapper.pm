@@ -34,7 +34,7 @@ sub new {
   while (my $source = $query_rs->next)
   { my $type = $source->type;
     if ($type->shortname eq "Intermapper") 
-    { $self->{"Intermapper"} = Net::Intermapper->new(hostname => $source->hostname, username => $source->username, password => $source->password, ssl => $source->ssl); # ssl=> $source->ssl);
+    { $self->{"Intermapper"}{$source->id} = Net::Intermapper->new(hostname => $source->hostname, username => $source->username, password => $source->password, ssl => $source->ssl); # ssl=> $source->ssl);
     }
   }
   bless $self, $class;
@@ -44,33 +44,36 @@ sub new {
 # Source Intermapper - Destination NG    
 sub load_users
 { my $self = shift;
-  my $users = $self->{"Intermapper"}->users;
-  my %users = % { $users };
+  for my $sourceid (keys %{$self->{"Intermapper"}})
+  { my $users = $self->{"Intermapper"}{$sourceid}->users;
+    my %users = % { $users };
 
-  my $im_rs = $self->{"DB"}->resultset('DsIntermapperUser');
-  my $query_rs = $im_rs->search();
-  my %imusers = ();
-  while (my $account = $query_rs->next)
-  { $imusers{$account->name} = $account;
-  }
-  for my $user (keys %users)
-  { if (!$imusers{$user})
-    { my $status = $status_imported;
-      $users{$user}->External("false") unless $users{$user}->External;
-      my $encpassword = encode_base64($self->{"CIPHER"}->encrypt($self->{"SALT"}.$users{$user}->Password.$user));
-      $self->{"DB"}->resultset('DsIntermapperUser')->create(
-          { groups => $users{$user}->Groups, name => $users{$user}->Name, guest => $users{$user}->Guest, 
-            status => $status, id => $users{$user}->Id, password => $encpassword, external => $users{$user}->External,
-          });
+    my $im_rs = $self->{"DB"}->resultset('DsIntermapperUser');
+    my $query_rs = $im_rs->search({source => $sourceid });
+    my %imusers = ();
+    while (my $account = $query_rs->next)
+    { $imusers{$account->name} = $account;
     }
+    for my $user (keys %users)
+    { if (!$imusers{$user})
+      { my $status = $status_imported;
+        $users{$user}->External("false") unless $users{$user}->External;
+        my $encpassword = encode_base64($self->{"CIPHER"}->encrypt($self->{"SALT"}.$users{$user}->Password.$user));
+        $self->{"DB"}->resultset('DsIntermapperUser')->create(
+            { groups => $users{$user}->Groups, name => $users{$user}->Name, guest => $users{$user}->Guest, 
+              status => $status, id => $users{$user}->Id, password => $encpassword, external => $users{$user}->External,
+              uid => $sourceid."-".$users{$user}->Id, source => $sourceid
+            });
+      }
   
-    if ($imusers{$user})
-    { my $status = $status_synchronized;
-      my $encpassword = encode_base64($self->{"CIPHER"}->encrypt($self->{"SALT"}.$users{$user}->Password.$user));
-      $imusers{$user}->update(
-          { groups => $users{$user}->Groups, name => $users{$user}->Name, guest => $users{$user}->Guest, 
-            status => $status, password => $encpassword, external => $users{$user}->External,
-          });
+      if ($imusers{$user})
+      { my $status = $status_synchronized;
+        my $encpassword = encode_base64($self->{"CIPHER"}->encrypt($self->{"SALT"}.$users{$user}->Password.$user));
+        $imusers{$user}->update(
+            { groups => $users{$user}->Groups, name => $users{$user}->Name, guest => $users{$user}->Guest, source => $sourceid,
+              status => $status, password => $encpassword, external => $users{$user}->External, uid => $sourceid."-".$users{$user}->Id
+            });
+      }
     }
   }
 }

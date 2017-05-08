@@ -1,6 +1,6 @@
                 <!-- Page Heading -->
-                <div class="row"><h3>Mappings <small>Overview</small></h2><hr></div>
                 <!-- /.row -->
+                <div class="row"><h3>Synchronization <small>Mappings</small></h3><hr></div>
 
                 <div class="row">
                     <div class="col-lg-12">
@@ -23,10 +23,10 @@
                 % foreach my $mapping (sort keys %{$mappings}) {                
                                     <tr>
                                         <td><input type="checkbox" class="check_list" id="<%= $mappings->{$mapping}->{id} %>" name="check_<%= $mappings->{$mapping}->{id} %>" value="<%= $mappings->{$mapping}->{name} %>"></td>
-                                        <td><%= $mappings->{$mapping}->{source_ds} %></td>
+                                        <td><%= $mappings->{$mapping}->{source_ds}->type->shortname %></td>
                                         <td><span class="label label-success"><%= $mappings->{$mapping}->{source_table} %></span></td>
                                         <td><span class="label label-primary"><%= $mappings->{$mapping}->{source_field} %></td>
-                                        <td><%= $mappings->{$mapping}->{destination_ds} %></td>
+                                        <td><%= $mappings->{$mapping}->{destination_ds}->type->shortname %></td>
                                         <td><span class="label label-success"><%= $mappings->{$mapping}->{destination_table} %></span></td>
                                         <td><span class="label label-primary"><%= $mappings->{$mapping}->{destination_field} %></td>
                                         <td><form style="display: inline" method="delete" action="/mappings/<%= $mappings->{$mapping}->{id} %>"><input type="hidden" name="_method" value="delete"><button type="submit" class="btn btn-xs btn-danger" type="submit"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button></form>&nbsp;
@@ -34,6 +34,7 @@
 % }
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
                 

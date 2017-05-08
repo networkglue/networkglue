@@ -1,5 +1,5 @@
                 <!-- Page Heading -->
-                <div class="row"><h3>Accounts <small><%= $filterheader %>Overview</small></h2><hr></div>
+                <div class="row"><h3>Accounts <small><%= $filterheader %>Overview</small></h3><hr></div>
                 <!-- /.row -->
 
                 <div class="row">
@@ -27,7 +27,6 @@
                 % next if $account =~ /^stub_/;
                                     <tr>
                                         <td><input type="checkbox" class="check_list" id="<%= $accounts->{$account}->{name} %>" name="check_<%= $accounts->{$account}->{name} %>" value="<%= $accounts->{$account}->{name} %>"></td>
-                                        </td>
                                         <td><a href="/accounts/<%= $accounts->{$account}->{name} %>"><%= $accounts->{$account}->{name} %></a></td>
                                         <td><i class="fa <%= $status->{$account}->{acs} %>" aria-hidden="true"></i></td>
                                         <td><i class="fa <%= $status->{$account}->{ise} %>" aria-hidden="true"></i></td>

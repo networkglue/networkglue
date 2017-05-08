@@ -1,0 +1,41 @@
+                <!-- Page Heading -->
+                <!-- /.row -->
+                <div class="row"><h3>Synchronization <small>Rules</small></h3><hr></div>
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="table-responsive">
+                            <table class="display responsive no-wrap" id="syncruletable" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th width="2%"><input type="checkbox" id="all" name="check_all" value="1"></th>
+                                        <th width="15%">Source Data Source</th>
+                                        <th width="15%">Source Type</th>                                        
+                                        <th width="15%">Destination Data Source</th>
+                                        <th width="15%">Destination Type</th>
+                                        <th width="5%">&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                % foreach my $syncrule (sort keys %{$syncrules}) {
+                                    <tr>
+                                        <td><input type="checkbox" class="check_list" id="<%= $syncrules->{$syncrule}->{id} %>" name="check_<%= $syncrules->{$syncrule}->{id} %>" value="<%= $syncrules->{$syncrule}->{name} %>"></td>
+                                        <td><%= $syncrules->{$syncrule}->{"source_ds"}->hostname %></td>
+                                        <td><%= $syncrules->{$syncrule}->{"source_ds"}->type->shortname %></td>
+                                        <td><%= $syncrules->{$syncrule}->{"destination_ds"}->hostname %></td>
+                                        <td><%= $syncrules->{$syncrule}->{"destination_ds"}->type->shortname %></td>                                        
+                                        <td><form style="display: inline" method="delete" action="/mappings/<%= $syncrules->{$syncrule}->{id} %>"><input type="hidden" name="_method" value="delete"><button type="submit" class="btn btn-xs btn-danger" type="submit"><span class="glyphicon glyphicon-trash"></span>&nbsp;</button></form>&nbsp;
+                                    </tr>
+% }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-12">
+                    </div>
+                </div>
+                <!-- /.row -->

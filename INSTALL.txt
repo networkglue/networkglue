@@ -163,7 +163,7 @@ CREATE TABLE ds_acs_identitygroups
 ( uid character varying(16),
   id integer,
   source integer REFERENCES ds_sources(id),
-  name character varying(64),
+  name character varying(128),
   description character varying(128),
   status integer,
   checksum character varying(64),
@@ -182,7 +182,7 @@ CREATE TABLE ds_acs_users
   name character varying(64),
   password character varying,
   enablePassword character varying,
-  description character varying(64),
+  description character varying(128),
   identityGroupName character varying(16) REFERENCES ds_acs_identitygroups(uid),
   enabled bool,
   passwordNeverExpires bool,
@@ -205,7 +205,7 @@ CREATE TABLE ds_ise_identitygroup
 ( uid character varying(140),
   id character varying(128),
   source integer REFERENCES ds_sources(id),
-  name character varying(64),
+  name character varying(128),
   description character varying(128),
   status integer,
   checksum character varying(64),
@@ -264,10 +264,10 @@ ALTER TABLE ds_intermapper_users
 
 CREATE TABLE mappings
 ( id integer,
-  source_ds integer,
+  source_ds integer REFERENCES ds_sources(id),
   source_table character varying(128),
   source_field character varying(128),
-  destination_ds integer,
+  destination_ds integer REFERENCES ds_sources(id),
   destination_table character varying(128),
   destination_field character varying(128),
   overwriteflag bool,
@@ -295,6 +295,19 @@ WITH (
 ALTER TABLE authentication
   OWNER TO ngpguser;
 
+CREATE TABLE syncrules
+( id integer,
+  source_ds integer REFERENCES ds_sources(id),
+  destination_ds integer REFERENCES ds_sources(id),
+  priority integer,
+  PRIMARY KEY (id) 
+)
+WITH (
+  OIDS=TRUE
+);
+ALTER TABLE syncrules
+  OWNER TO ngpguser;
+  
 REVOKE CONNECT ON DATABASE ng FROM PUBLIC;
 
 GRANT CONNECT

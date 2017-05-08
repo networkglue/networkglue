@@ -60,6 +60,53 @@
     /* symbol for "collapsed" panels */
     content: "\e080";    /* adjust as needed, taken from bootstrap.css */
     }
+    .dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu>.dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -6px;
+    margin-left: -1px;
+    -webkit-border-radius: 0 6px 6px 6px;
+    -moz-border-radius: 0 6px 6px;
+    border-radius: 0 6px 6px 6px;
+}
+
+.dropdown-submenu:hover>.dropdown-menu {
+    display: block;
+}
+
+.dropdown-submenu>a:after {
+    display: block;
+    content: " ";
+    float: right;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 5px 0 5px 5px;
+    border-left-color: #ccc;
+    margin-top: 5px;
+    margin-right: -10px;
+}
+
+.dropdown-submenu:hover>a:after {
+    border-left-color: #fff;
+}
+
+.dropdown-submenu.pull-left {
+    float: none;
+}
+
+.dropdown-submenu.pull-left>.dropdown-menu {
+    left: -100%;
+    margin-left: 10px;
+    -webkit-border-radius: 6px 0 6px 6px;
+    -moz-border-radius: 6px 0 6px 6px;
+    border-radius: 6px 0 6px 6px;
+} 
 
     </style>
 
@@ -167,8 +214,12 @@
                         <li>
                             <a href="/datasources/import/"><i class="fa fa-fw fa-database"></i> Import Data</a>
                         </li>
-                        <li>
-                            <a href="/mappings/"><i class="fa fa-fw fa-tasks"></i> Mappings</a>
+                        <li class="dropdown-submenu">
+                        <a tabindex="-1" href="#"><i class="fa fa-fw fa-tasks"></i> Sync</a>
+                        <ul class="dropdown-menu">
+                          <li><a tabindex="-1" href="/sync/rules/"><i class="fa fa-fw fa-tasks"></i> Rules</a></li>
+                          <li><a href="/sync/mappings/"><i class="fa fa-fw fa-tasks"></i> Mappings</a></li>
+                        </ul>
                         </li>
                         <li>
                             <a href="/authentication/"><i class="fa fa-fw fa-lock"></i> Authentication</a>
@@ -250,7 +301,7 @@
                             </li>
                 % foreach my $item (sort keys %{$items}) {                
                             <li>
-                                <a href="/accounts?filter=<%= $item %>"><%= $items->{$item} %> Accounts</a>
+                                <a href="/accounts?filter=<%= $item %>"><%= $items->{$item}->type->shortname %> Accounts</a>
                             </li>
 % }
                         </ul>
@@ -263,12 +314,12 @@
                             </li>
                 % foreach my $item (sort keys %{$items}) {                
                             <li>
-                                <a href="/accountgroups?filter=<%= $item %>"><%= $items->{$item} %> Account Groups</a>
+                                <a href="/accountgroups?filter=<%= $item %>"><%= $items->{$item}->type->shortname %> Account Groups</a>
                             </li>
 % }
                         </ul>
                     </li>
-                    <li>
+<!--                    <li>
                         <a href="javascript:;" data-toggle="collapse" data-target="#devicesmenu"><i class="fa fa-fw fa-tasks"></i> Devices <i class="fa fa-fw fa-caret-down"></i></a>
                         <ul id="devicesmenu" class="collapse">
                             <li>
@@ -276,11 +327,11 @@
                             </li>
                 % foreach my $item (sort keys %{$items}) {                
                             <li>
-                                <a href="/devices?filter=<%= $item %>"><%= $items->{$item} %> Devices</a>
+                                <a href="/devices?filter=<%= $item %>"><%= $items->{$item}->type->shortname %> Devices</a>
                             </li>
 % }
                         </ul>
-                    </li>
+                    </li>-->
                 </ul>
             </div>
             <!-- /.navbar-collapse -->

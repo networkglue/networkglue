@@ -1,7 +1,7 @@
-                % foreach my $uid (sort keys %{$account->{"im"}}) {
+                % foreach my $uid (sort keys %{$account->{"intermapper"}}) {
                                 <div class="panel-footer">
-                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="im_toggle_<%= $uid %>" value="1"<%= $ise_toggle->{$account->{"im"}{$uid}{"source"}->id} %>></div>
-                                <h5><a href="#" data-toggle="collapse"  class="accordion-toggle" data-target="#intermapperattributes_<%= $uid %>">Intermapper Attributes&nbsp;</a> - <%= $account->{"im"}{$uid}{"source"}->hostname %></h5>
+                                <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="im_toggle_<%= $uid %>"  value="1" <%= $im_toggle->{$account->{"intermapper"}{$uid}{"source"}->id} %>></div>
+                                <h5><a href="#" data-toggle="collapse"  class="accordion-toggle" data-target="#intermapperattributes_<%= $uid %>">Intermapper Attributes&nbsp;</a> - <%= $account->{"intermapper"}{$uid}{"source"}->hostname %></h5>
                                 <div id="intermapperattributes_<%= $uid %>" class="collapse">
                                 <input type="hidden" name="im_uid" value="<%= $uid %>">
                                 <div class="form-group">
@@ -19,9 +19,10 @@
 
                                     <div class="input-group col-sm-8">
                                         <select class="form-control" id="intermapper_groups" name="intermapper_groups_<%= $uid %>">
-                % foreach my $imidgroup (sort keys %{$imidgroups}) {                
-                                            <option value="<%= $imidgroup %>"<%= $imidgroups->{$imidgroup}{"selected"} %>><%= $imidgroups->{$imidgroup}{"name"} %></option>
+                % foreach my $imidgroup (sort keys %{$imidgroups-> { $account->{"intermapper"}{$uid}{"source"}->id }}) {
+                                            <option value="<%= $imidgroup %>"<%= $imidgroups->{ $account->{"intermapper"}{$uid}{"source"}->id }{$imidgroup}{"selected"} %>><%= $imidgroups->{ $account->{"intermapper"}{$uid}{"source"}->id }{$imidgroup}{"name"} %></option>
 % }
+
                                         </select>
                                     </div>
                                 </div>
@@ -29,7 +30,7 @@
                                 <div class="form-group">
                                     <label for="intermapperexternal" class="col-sm-4 control-label">External</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="checkbox" id="intermapper_external" name="intermapper_external_<%= $uid %>" value="1"<%= $account->{"im"}{$uid}{"external"} %>>
+                                        <input type="checkbox" id="intermapper_external" name="intermapper_external_<%= $uid %>" value="1"<%= $account->{"intermapper"}{$uid}{"external"} %>>
                                     </div>
                                 </div>
                                 <div class="clearfix"></div>
@@ -37,7 +38,7 @@
                                 <div class="form-group">
                                     <label for="intermapperguest" class="col-sm-4 control-label">Guest</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="intermapper_guest" name="intermapper_guest_<%= $uid %>" placeholder="Guest Login" value="<%= $account->{"im"}{$uid}{"guest"} %>">
+                                        <input type="text" class="form-control" id="intermapper_guest" name="intermapper_guest_<%= $uid %>" placeholder="Guest Login" value="<%= $account->{"intermapper"}{$uid}{"guest"} %>">
                                     </div>
                                 </div>
 
@@ -48,8 +49,8 @@
                 % foreach my $uid (sort keys %{$account->{"stub_intermapper"}}) {
                                 <div class="panel-footer">
                                 <div class="pull-right"><input type="checkbox" data-toggle="toggle" class="pull-right" data-size="small" name="im_toggle_<%= $uid %>" value="1"></div>
-                                <h5><a href="#" data-toggle="collapse"  class="accordion-toggle" data-target="#intermapperattributes_<%= $uid %>">Intermapper Attributes&nbsp;</a> - <%= $account->{"stub_im"}{$uid}{"source"}->hostname %></h5>
-                                <div id="intermapperattributes<%= $uid %>" class="collapse">
+                                <h5><a href="#" data-toggle="collapse"  class="accordion-toggle" data-target="#intermapperattributes_<%= $uid %>">Intermapper Attributes&nbsp;</a> - <%= $account->{"stub_intermapper"}{$uid}{"source"}->hostname %></h5>
+                                <div id="intermapperattributes_<%= $uid %>" class="collapse">
                                 <input type="hidden" name="im_uid" value="<%= $uid %>">
                                 <div class="form-group">
                                     <label for="impassword" class="col-sm-4 control-label">Password</label>
@@ -66,8 +67,8 @@
 
                                     <div class="input-group col-sm-8">
                                         <select class="form-control" id="intermapper_groups" name="intermapper_groups_<%= $uid %>">
-                % foreach my $imidgroup (sort keys %{$imidgroups}) {                
-                                            <option value="<%= $imidgroup %>"<%= $imidgroups->{$imidgroup}{"selected"} %>><%= $imidgroups->{$imidgroup}{"name"} %></option>
+                % foreach my $imidgroup (sort keys %{$imidgroups-> { $account->{"stub_intermapper"}{$uid}{"source"}->id }}) {                
+                                            <option value="<%= $imidgroup %>"<%= $imidgroups->{ $account->{"stub_intermapper"}{$uid}{"source"}->id }{$imidgroup}{"selected"} %>><%= $imidgroups->{ $account->{"stub_intermapper"}{$uid}{"source"}->id }{$imidgroup}{"name"} %></option>
 % }
                                         </select>
                                     </div>
