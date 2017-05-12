@@ -262,6 +262,79 @@ WITH (
 ALTER TABLE ds_intermapper_users
   OWNER TO ngpguser;
 
+CREATE TABLE ds_na_users
+( uid character varying(72),
+  source integer REFERENCES ds_sources(id),
+  emailAddress character varying(100),
+  comments character varying,
+  userID integer,
+  distinguishedName character varying(100),
+  allowFailover bool,
+  userPassword character varying,
+  userName character varying(100),
+  timeZone character varying(32),
+  firstName character varying(32),
+  useAaaLoginForProxy bool,
+  aaaPassword character varying,
+  userCustom2 character varying,
+  deviceGroup1ID integer,
+  privilegeLevel character varying(16),
+  passwordOption character varying(32),
+  requiredUser bool,
+  lastLoginDate character varying(32),
+  aaaUserName character varying(100),
+  status character varying(16),
+  ticketNumber character varying(16),
+  userCustom1 character varying,
+  passwordLastModifiedDate character varying(16),
+  createDate character varying(16),
+  lastName character varying(32),
+  userPasswordUnhashed  character varying,
+  deviceGroup3ID integer,
+  deviceGroup2ID integer,
+  userCustom4 character varying,
+  userCustom5 character varying,
+  userCustom6 character varying,
+  lastModifiedDate character varying(16),
+  userCustom3 character varying,
+  na_status integer,
+  checksum character varying(64),
+  PRIMARY KEY (uid) 
+) WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_acs_users
+  OWNER TO ngpguser;
+
+CREATE TABLE ds_na_groups
+( uid character varying(72),
+  source integer REFERENCES ds_sources(id),
+  userGroupCustom3 character varying,
+  comments character varying,
+  userGroupCustom1  character varying,
+  required bool,
+  distinguishedName character varying(100),
+  createDate character varying(64),
+  userGroupName character varying (100),
+  userGroupID integer,
+  userGroupCustom2 character varying,
+  deviceGroup2ID integer,
+  deviceGroup3ID integer,
+  description character varying,
+  deviceGroup1ID integer,
+  userGroupCustom4 character varying,
+  userGroupCustom6 character varying,
+  lastModifiedDate character varying(16),
+  userGroupCustom5 character varying,
+  na_status integer,
+  checksum character varying(64),
+  PRIMARY KEY (uid) 
+) WITH (
+  OIDS=TRUE
+);
+ALTER TABLE ds_na_groups
+  OWNER TO ngpguser;
+  
 CREATE TABLE mappings
 ( id integer,
   source_ds integer REFERENCES ds_sources(id),

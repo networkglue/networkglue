@@ -182,6 +182,36 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 ds_na_groups
+
+Type: has_many
+
+Related object: L<NG::Schema::Result::DsNaGroup>
+
+=cut
+
+__PACKAGE__->has_many(
+  "ds_na_groups",
+  "NG::Schema::Result::DsNaGroup",
+  { "foreign.source" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 ds_na_users
+
+Type: has_many
+
+Related object: L<NG::Schema::Result::DsNaUser>
+
+=cut
+
+__PACKAGE__->has_many(
+  "ds_na_users",
+  "NG::Schema::Result::DsNaUser",
+  { "foreign.source" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 mappings_destination_ds
 
 Type: has_many
@@ -263,8 +293,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-04-23 00:11:14
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gFn4iDG1XKwo5ChowTeg1w
+# Created by DBIx::Class::Schema::Loader v0.07045 @ 2017-05-11 11:25:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TdZ0tTf5lkEzjPrc3/a51A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -4,6 +4,7 @@ use Data::Dumper;
 use Net::Cisco::ACS::User;
 use Net::Cisco::ISE::InternalUser;
 use Net::Intermapper::User;
+use Net::HP::NA::User;
 
 use Digest::MD5 qw(md5_hex);
 use MIME::Base64;
@@ -11,8 +12,8 @@ use MIME::Base64;
 my $accounts = {};
 my $acsaccounts = {};
 my $iseaccounts = {};
-my $iseaccounts_ref = [];
 my $intermapperaccounts = {};
+my $naaccounts = {};
 
 my $status_clean = 0;
 my $status_changed = 1; # NG Entry Changed
@@ -28,7 +29,6 @@ sub new_form { # GET /accounts/new - form to create a account
   $self->stash(filter => $filter);
   $self->stash(items => $self->items);  
   my $id = 0;
-  #$self->stash(iseaccounts => $iseaccounts_ref);
   my $filterheader = "";
   my $auth_rs = $self->db->resultset('Authentication');
   my $query_rs = $auth_rs->search;
@@ -43,6 +43,7 @@ sub new_form { # GET /accounts/new - form to create a account
   my %acs_toggle = ();
   my %ise_toggle = ();
   my %im_toggle = ();
+  my %na_toggle = ();
   
   my $sources_rs = $self->db->resultset('DsSource');
   $query_rs = $sources_rs->search;
@@ -57,8 +58,9 @@ sub new_form { # GET /accounts/new - form to create a account
   { $account->{"stub_ise"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ISE";
     $account->{"stub_acs"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ACS";
     $account->{"stub_intermapper"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
+	$account->{"stub_na"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "NA";
   }
-  
+
   $self->stash(account => $account);
   
   my $acs_rs = $self->db->resultset('DsAcsIdentitygroup');
@@ -85,9 +87,17 @@ sub new_form { # GET /accounts/new - form to create a account
     { $imidgroups->{$accountgroup->source->id}{$name}{"name"} = $name; }
   } 
 
+  my $na_rs = $self->db->resultset('DsNaGroup');
+  $query_rs = $na_rs->search;
+  my $naidgroups = {};
+  while (my $accountgroup = $query_rs->next)
+  { $naidgroups->{$accountgroup->source->id}{$accountgroup->uid}{"name"} = $accountgroup->userGroupName; }
+  $self->stash(naidgroups => $naidgroups);
+  
   $self->stash(acs_toggle => \%acs_toggle);
   $self->stash(ise_toggle => \%ise_toggle);
   $self->stash(im_toggle => \%im_toggle);
+  $self->stash(na_toggle => \%na_toggle);
   my $username = $self->session('username');
   $self->stash(username => $username);
 
@@ -104,7 +114,6 @@ sub show { # GET /accounts/123 - show account with id 123
   $self->consolidate() unless keys %{ $accounts };  
   my $account = $accounts->{$id};
   $self->stash(account => $account);
-  $self->stash(iseaccounts => $iseaccounts_ref);
   my $filterheader = "";
   my $auth_rs = $self->db->resultset('Authentication');
   my $query_rs = $auth_rs->search;
@@ -129,6 +138,7 @@ sub show { # GET /accounts/123 - show account with id 123
   my %acs_toggle = ();
   my %ise_toggle = ();
   my %im_toggle = ();
+  my %na_toggle = ();
   
   for my $target (sort keys %{$sources})
   { if ($sources->{$target} eq "ACS")
@@ -141,7 +151,6 @@ sub show { # GET /accounts/123 - show account with id 123
        $acsidgroups->{$accountgroup->source->id}{$accountgroup->uid}{"selected"} = " selected" if $account->{"acs_identitygroupname"} && $account->{"acs_identitygroupname"} eq $accountgroup->name;
      }
      $self->stash(acsidgroups => $acsidgroups);
-     #my $acs_toggle = $account->{"acs_status"} && $account->{"acs_status"} ne "fa-close text-danger" ? " checked" : "";
      $acs_toggle{$target} = $account->{"acs"} && $account->{"acs"} ne "fa-close text-danger" ? " checked" : "";
     }
     if ($sources->{$target} eq "ISE")
@@ -154,7 +163,6 @@ sub show { # GET /accounts/123 - show account with id 123
         $iseidgroups->{$accountgroup->source->id}{$accountgroup->uid}{"selected"} = " selected" if $account->{"ise_identitygroups"} && $account->{"ise_identitygroups"} eq $accountgroup->name;
       }
       $self->stash(iseidgroups => $iseidgroups);
-      #my $ise_toggle = $account->{"ise_status"} && $account->{"ise_status"} ne "fa-close text-danger" ? " checked" : "";
       $ise_toggle{$target} = $account->{"ise"} && $account->{"ise"} ne "fa-close text-danger" ? " checked" : "";
     }
     
@@ -171,13 +179,26 @@ sub show { # GET /accounts/123 - show account with id 123
         }
       } 
       $self->stash(imidgroups => $imidgroups);
-      #my $im_toggle = $account->{"intermapper_status"} && $account->{"intermapper_status"} ne "fa-close text-danger" ? " checked" : "";
       $im_toggle{$target} = $account->{"intermapper"} && $account->{"intermapper"} ne "fa-close text-danger" ? " checked" : "";
     }
+    if ($sources->{$target} eq "NA")
+    { my $na_rs = $self->db->resultset('DsNaGroup');
+      $query_rs = $na_rs->search;
+      my $naidgroups = {};
+
+      while (my $accountgroup = $query_rs->next)
+      { $naidgroups->{$accountgroup->source->id}{$accountgroup->uid}{"name"} = $accountgroup->userGroupName;
+        $naidgroups->{$accountgroup->source->id}{$accountgroup->uid}{"selected"} = " selected" if $account->{"na_groups"} && $account->{"na_groups"} eq $accountgroup->userGroupName;
+      }
+      $self->stash(naidgroups => $naidgroups);
+      $na_toggle{$target} = $account->{"na"} && $account->{"na"} ne "fa-close text-danger" ? " checked" : "";
+    }
+	
   }
   $self->stash(acs_toggle => \%acs_toggle);
   $self->stash(ise_toggle => \%ise_toggle);
   $self->stash(im_toggle => \%im_toggle);
+  $self->stash(na_toggle => \%na_toggle);
   
   my $username = $self->session('username');
   $self->stash(username => $username);
@@ -201,9 +222,8 @@ sub index { # GET /accounts - list of all accounts
   my %status = ();
   for my $account (keys %accounts)
   { #for my $key (qw(acs ise ad ldap nagios hpna intermapper cacti))
-    for my $key (qw(acs ise intermapper))
-    { #$accounts->{$account}{"$key"} = ($accounts->{$account}{"$key"} && $accounts->{$account}{"$key"} ne "fa-close text-danger") ? "fa-check text-success" : "fa-close text-danger";
-      $status{$account}{$key} = ($accounts->{$account}{$key} && $accounts->{$account}{$key} ne "fa-close text-danger") ? "fa-check text-success" : "fa-close text-danger";
+    for my $key (qw(acs ise intermapper na))
+    { $status{$account}{$key} = ($accounts->{$account}{$key} && $accounts->{$account}{$key} ne "fa-close text-danger") ? "fa-check text-success" : "fa-close text-danger";
     }
   }
   $self->stash(accounts => $accounts);
@@ -252,9 +272,14 @@ sub create { # POST /accounts - create new account
   $query_rs = $ise_rs->search({ name => "__default" });
   my $defaultise = $query_rs->first;
 
+  my $na_rs = $self->db->resultset('DsNaUser');
+  $query_rs = $na_rs->search({ name => "__default" });
+  my $defaultna = $query_rs->first;
+  
   my @acs_uid = @{ $self->every_param('acs_uid') };
   my @ise_uid = @{ $self->every_param('ise_uid') };
   my @im_uid = @{ $self->every_param('im_uid') };
+  my @na_uid = @{ $self->every_param('na_uid') };
   
   my $acs_toggle = $self->param("acs_toggle") || "0";
   my $ise_toggle = $self->param("ise_toggle") || "0";
@@ -437,6 +462,94 @@ sub create { # POST /accounts - create new account
        });
     }
   }
+
+  for my $uid (@na_uid)
+  { my ($source) = $uid =~ /^(.*?)\-X$/;
+    my $na_toggle = $self->param("na_toggle_".$uid) || "0";
+    my $na_userpassword = $self->param("na_userpassword_".$uid) || $password;
+    my $encnapassword = encode_base64($self->cipher->encrypt($self->salt.$na_userpassword.$name));
+    my $na_aaapassword = $self->param("na_aaapassword_".$uid) || $password;
+    my $encnaaaapassword = encode_base64($self->cipher->encrypt($self->salt.$na_aaapassword.$name));
+	my $na_emailaddress = $self->param("na_emailaddress_".$uid);
+	my $na_comments = $self->param("na_comments_".$uid);
+	my $na_distinguishedname = $self->param("na_distinguishedname_".$uid);
+	my $na_allowfailover = $self->param("na_allowfailover_".$uid);
+	my $na_username = $self->param("na_username_".$uid);
+	my $na_timezone = $self->param("na_timezone_".$uid);
+	my $na_firstname = $self->param("na_firstname_".$uid);
+	my $na_useaaaloginforproxy = $self->param("na_useaaaloginforproxy_".$uid);
+	my $na_privilegelevel = $self->param("na_privilegelevel_".$uid);
+	my $na_passwordoption = $self->param("na_passwordoption_".$uid);
+	my $na_aaausername = $self->param("na_aaausername_".$uid);
+	my $na_status = $self->param("na_status_".$uid);
+	my $na_ticketnumber = $self->param("na_ticketnumber_".$uid);
+	my $na_lastname = $self->param("na_lastname_".$uid);
+	
+	my $checksum = "";
+    #my $checksum = md5_hex($name.$encacspassword.$acs_enabled.$acs_description.$acs_identitygroupname.$acs_enablepassword.$acs_passwordneverexpires.$acs_dateexceedsenabled.
+    #                     $acs_dateexceeds.$acs_passwordtype);
+  
+    # Temporary fix
+    my $namax = $self->db->resultset('DsNaUser')->get_column('userid');
+    my $namaxid = $namax->max;
+    $namaxid++;
+
+    # Need to store full datetime instead of date
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    $mon++;
+    $year += 1900;  
+    my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec); 
+    my $lastmodified = "$months[$mon] $mday $year $hour:$min:$sec";
+    my $created = "$months[$mon] $mday $year $hour:$min:$sec";
+    $uid = "$source-$namaxid";
+    my $id = $name;
+    if ($defaultna)
+    { $na_userpassword ||= $defaultna->userpassword;
+	  $na_aaapassword ||= $defaultna->aaapassword;
+	  $na_emailaddress ||= $defaultna->emailaddress;
+	  $na_comments ||= $defaultna->comments;
+	  $na_distinguishedname ||= $defaultna->distinguishedname;
+	  $na_allowfailover ||= $defaultna->allowfailover;
+	  $na_username ||= $defaultna->username;
+	  $na_timezone ||= $defaultna->timezone;
+	  $na_firstname ||= $defaultna->firstname;
+	  $na_useaaaloginforproxy ||= $defaultna->useaaaloginforproxy;
+	  $na_privilegelevel ||= $defaultna->privilegelevel;
+	  $na_passwordoption ||= $defaultna->passwordoption;
+	  $na_aaausername ||= $defaultna->aaausername;
+	  $na_status ||= $defaultna->status;
+	  $na_ticketnumber ||= $defaultna->ticketnumber;
+	  $na_lastname ||= $defaultna->lastname;
+    }
+
+    if ($uid && $na_toggle)
+    { $accounts->{$id}{"na"}{$uid}{"userpassword"} = $na_userpassword;
+	  $accounts->{$id}{"na"}{$uid}{"aaapassword"} = $na_aaapassword;
+	  $accounts->{$id}{"na"}{$uid}{"emailaddress"} = $na_emailaddress;
+	  $accounts->{$id}{"na"}{$uid}{"comments"} = $na_comments;
+	  $accounts->{$id}{"na"}{$uid}{"distinguishedname"} = $na_distinguishedname;
+	  $accounts->{$id}{"na"}{$uid}{"allowfailover"} = $na_allowfailover;
+	  $accounts->{$id}{"na"}{$uid}{"username"} = $na_username;
+	  $accounts->{$id}{"na"}{$uid}{"timezone"} = $na_timezone;
+	  $accounts->{$id}{"na"}{$uid}{"firstname"} = $na_firstname;
+	  $accounts->{$id}{"na"}{$uid}{"useaaaloginforproxy"} = $na_useaaaloginforproxy;
+	  $accounts->{$id}{"na"}{$uid}{"privilegelevel"} = $na_privilegelevel;
+	  $accounts->{$id}{"na"}{$uid}{"passwordoption"} = $na_passwordoption;
+	  $accounts->{$id}{"na"}{$uid}{"aaausername"} = $na_aaausername;
+	  $accounts->{$id}{"na"}{$uid}{"status"} = $na_status;
+	  $accounts->{$id}{"na"}{$uid}{"ticketnumber"} = $na_ticketnumber;
+	  $accounts->{$id}{"na"}{$uid}{"lastname"} = $na_lastname;
+
+      $self->db->resultset('DsNaUser')->create(
+        { userpassword => $na_userpassword, emailaddress => $na_emailaddress, comments => $na_comments, aaapassword => $na_aaapassword,
+		  distinguishedname => $na_distinguishedname, allowfailover => $na_allowfailover, username => $na_username, timezone => $na_timezone,
+		  firstname => $na_firstname, useaaaloginforproxy => $na_useaaaloginforproxy, privilegelevel => $na_privilegelevel, lastname => $na_lastname,
+		  passwordoption => $na_passwordoption, aaausername => $na_aaausername, status => $na_status, ticketnumber => $na_ticketnumber,
+		  id => $namaxid, na_status => $status_created, source=> $source, uid => $uid, #lastmodified => $lastmodified, created => $created,
+        });
+    }
+  }
+
   $self->redirect_to("/accounts/");
 }
 
@@ -451,6 +564,7 @@ sub update { # PUT /accounts/123 - update a account
   my @acs_uid = @{ $self->every_param('acs_uid') };
   my @ise_uid = @{ $self->every_param('ise_uid') };
   my @im_uid = @{ $self->every_param('im_uid') };
+  my @na_uid = @{ $self->every_param('na_uid') };  
   my $password = $self->param("password");
   my $authentication = $self->param("authentication");
   my $name = $self->param("name");
@@ -670,7 +784,126 @@ sub update { # PUT /accounts/123 - update a account
       $accounts->{$uid}{"intermapper"} = 0;
     }
   }
-  
+
+  for my $uid (@na_uid)
+  { my ($source) = $uid =~ /^(.*?)\-X$/;
+    my $na_toggle = $self->param("na_toggle_".$uid) || "0";
+    my $na_userpassword = $self->param("na_userpassword_".$uid) || $password;
+    my $encnapassword = encode_base64($self->cipher->encrypt($self->salt.$na_userpassword.$name));
+    my $na_aaapassword = $self->param("na_aaapassword_".$uid) || $password;
+    my $encnaaaapassword = encode_base64($self->cipher->encrypt($self->salt.$na_aaapassword.$name));
+	my $na_emailaddress = $self->param("na_emailaddress_".$uid);
+	my $na_comments = $self->param("na_comments_".$uid);
+	my $na_distinguishedname = $self->param("na_distinguishedname_".$uid);
+	my $na_allowfailover = $self->param("na_allowfailover_".$uid);
+	my $na_timezone = $self->param("na_timezone_".$uid);
+	my $na_firstname = $self->param("na_firstname_".$uid);
+	my $na_useaaaloginforproxy = $self->param("na_useaaaloginforproxy_".$uid);
+	my $na_privilegelevel = $self->param("na_privilegelevel_".$uid);
+	my $na_passwordoption = $self->param("na_passwordoption_".$uid);
+	my $na_aaausername = $self->param("na_aaausername_".$uid);
+	my $na_status = $self->param("na_status_".$uid);
+	my $na_ticketnumber = $self->param("na_ticketnumber_".$uid);
+	my $na_lastname = $self->param("na_lastname_".$uid);
+
+    # Temporary fix
+    my $namax = $self->db->resultset('DsNaUser')->get_column('userid');
+    my $namaxid = $namax->max;
+    $namaxid++;
+    if ($uid =~ /\-X$/) { $uid = ""; }
+
+    if ($uid && $na_toggle)
+    { $accounts->{$id}{"na"}{$uid}{"userpassword"} = $na_userpassword;
+	  $accounts->{$id}{"na"}{$uid}{"aaapassword"} = $na_aaapassword;
+	  $accounts->{$id}{"na"}{$uid}{"emailaddress"} = $na_emailaddress;
+	  $accounts->{$id}{"na"}{$uid}{"comments"} = $na_comments;
+	  $accounts->{$id}{"na"}{$uid}{"distinguishedname"} = $na_distinguishedname;
+	  $accounts->{$id}{"na"}{$uid}{"allowfailover"} = $na_allowfailover;
+	  $accounts->{$id}{"na"}{$uid}{"username"} = $name;
+	  $accounts->{$id}{"na"}{$uid}{"timezone"} = $na_timezone;
+	  $accounts->{$id}{"na"}{$uid}{"firstname"} = $na_firstname;
+	  $accounts->{$id}{"na"}{$uid}{"useaaaloginforproxy"} = $na_useaaaloginforproxy;
+	  $accounts->{$id}{"na"}{$uid}{"privilegelevel"} = $na_privilegelevel;
+	  $accounts->{$id}{"na"}{$uid}{"passwordoption"} = $na_passwordoption;
+	  $accounts->{$id}{"na"}{$uid}{"aaausername"} = $na_aaausername;
+	  $accounts->{$id}{"na"}{$uid}{"status"} = $na_status;
+	  $accounts->{$id}{"na"}{$uid}{"ticketnumber"} = $na_ticketnumber;
+	  $accounts->{$id}{"na"}{$uid}{"lastname"} = $na_lastname;
+      my $na_rs = $self->db->resultset('DsNaUser');
+      my $query_rs = $na_rs->search({ uid => $uid });
+      $encnapassword = $na_userpassword eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->userpassword : $encnapassword;
+	  $encnaaaapassword = $na_aaapassword eq "PASSWORDHASBEENCHANGED!!" ? $query_rs->first->aaapassword : $encnaaaapassword;
+
+	  my $checksum = ""; # TODO Checksum needs to be implemented properly
+      #my $checksum = md5_hex($name.$encacspassword.$acs_enabled.$acs_description.$acs_identitygroupname.$acs_enablepassword.$acs_passwordneverexpires.$acs_dateexceedsenabled.
+      #                   $acs_dateexceeds.$acs_passwordtype);
+	  # Need to store full datetime instead of date
+      my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+      $mon++;
+      $year += 1900;  
+      my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec); 
+      my $lastmodified = "$months[$mon] $mday $year $hour:$min:$sec";
+      my $created = "$months[$mon] $mday $year $hour:$min:$sec";
+	  if ($query_rs)
+      { $query_rs->first->update( 
+		  { userpassword => $na_userpassword, emailaddress => $na_emailaddress, comments => $na_comments, aaapassword => $na_aaapassword,
+			distinguishedname => $na_distinguishedname, allowfailover => $na_allowfailover, username => $name, timezone => $na_timezone,
+            firstname => $na_firstname, useaaaloginforproxy => $na_useaaaloginforproxy, privilegelevel => $na_privilegelevel, lastname => $na_lastname,
+			passwordoption => $na_passwordoption, aaausername => $na_aaausername, status => $na_status, ticketnumber => $na_ticketnumber,
+			userid => $namaxid, na_status => $status_changed, 
+			#lastmodified => $lastmodified
+        });
+		$self->app->log->debug("Update $uid Timezone: $na_timezone - ".$self->param("na_timezone_".$uid));
+		$self->app->log->debug("Update $uid Ticket Number: $na_ticketnumber - ".$self->param("na_ticketnumber_".$uid));
+		$self->app->log->debug("Update $uid Status: $na_status - ".$self->param("na_status_".$uid));
+		$self->app->log->debug("Update $uid Privilege: $na_privilegelevel - ".$self->param("na_privilegelevel_".$uid));
+		$self->app->log->debug("Update $uid Password Option: $na_passwordoption - ".$self->param("na_passwordoption_".$uid));
+		$self->app->log->debug("Update $uid Comments: $na_comments - ".$self->param("na_comments_".$uid));
+	
+	  }
+	}
+    if (!$uid && $na_toggle) # TODO: UID is, at this point, ALWAYS defined!!
+    { if ($na_userpassword || $na_aaapassword || $na_emailaddress || $na_comments || $na_distinguishedname || $na_allowfailover 
+	 || $na_timezone || $na_firstname || $na_useaaaloginforproxy || $na_privilegelevel || $na_lastname || $na_passwordoption || $na_aaausername
+	 || $na_status || $na_ticketnumber)
+     { my $checksum;# = md5_hex($name.$encisepassword.$ise_enabled.$ise_firstname.$ise_lastname.$ise_identitygroups.$ise_email.$ise_encenablepassword.
+                    #  $ise_changepassword.$ise_expirydateenabled.$ise_expirydate.$ise_passwordidstore);
+          $uid = "$source-$namaxid";
+          # TODO Checksum needs to be implemented properly
+
+		  # Need to store full datetime instead of date
+      my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+      $mon++;
+      $year += 1900;  
+      my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec); 
+      my $lastmodified = "$months[$mon] $mday $year $hour:$min:$sec";
+      my $created = "$months[$mon] $mday $year $hour:$min:$sec";
+      $self->db->resultset('DsNaUser')->create(
+        { userpassword => $na_userpassword, emailaddress => $na_emailaddress, comments => $na_comments, aaapassword => $na_aaapassword,
+		  distinguishedname => $na_distinguishedname, allowfailover => $na_allowfailover, username => $name, timezone => $na_timezone,
+		  firstname => $na_firstname, useaaaloginforproxy => $na_useaaaloginforproxy, privilegelevel => $na_privilegelevel, lastname => $na_lastname,
+		  passwordoption => $na_passwordoption, aaausername => $na_aaausername, status => $na_status, ticketnumber => $na_ticketnumber,
+		  userid => $namaxid, na_status => $status_created, source=> $source, uid => $uid, #lastmodified => $lastmodified, created => $created,
+        });
+		$self->app->log->debug("Create $uid Timezone: $na_timezone - ".$self->param("na_timezone_".$uid));
+		$self->app->log->debug("Create $uid Ticket Number: $na_ticketnumber - ".$self->param("na_ticketnumber_".$uid));
+		$self->app->log->debug("Create $uid Status: $na_status - ".$self->param("na_status_".$uid));
+		$self->app->log->debug("Create $uid Privilege: $na_privilegelevel - ".$self->param("na_privilegelevel_".$uid));
+		$self->app->log->debug("Create $uid Password Option: $na_passwordoption - ".$self->param("na_passwordoption_".$uid));
+		$self->app->log->debug("Create $uid Comments: $na_comments - ".$self->param("na_comments_".$uid));
+     } 
+  }
+    if ($uid && !$na_toggle)
+    { my $na_rs = $self->db->resultset('DsNaUser');
+      my $query_rs = $na_rs->search({ uid => $uid });
+      # $query_rs->delete;
+      # TODO Add support for delete flag & remove hash delete
+      delete($naaccounts->{$uid});
+      $query_rs->first->update({na_status => $status_deleted});
+      $accounts->{$uid}{"na"} = 0;
+    }
+  }
+
   $self->consolidate();
   
   $accounts->{$id}{"name"} = $name;
@@ -737,6 +970,14 @@ sub delete { # DELETE /accounts/123 - delete a account - Also multi-selected IDs
     { $query_rs->delete; # TODO Implement delete flag and remove DB delete
     }
     delete($intermapperaccounts->{$uid}); # TODO Implement delete flag and remove DB delete
+
+    my $na_rs = $self->db->resultset('DsNaUser');
+    $query_rs = $na_rs->search({ name => $uid }); # BUG again ?!?!?!? See a few lines up!
+    if ($query_rs)
+    { $query_rs->delete; # TODO Implement delete flag and remove DB delete
+    }
+    delete($naaccounts->{$uid}); # TODO Implement delete flag and remove DB delete
+
   }
   $self->redirect_to("/accounts/");
 }
@@ -767,6 +1008,7 @@ sub consolidate {
     for my $source (keys %sources)
     { $accounts->{$account->name}{"stub_ise"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ISE";
       $accounts->{$account->name}{"stub_intermapper" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
+	  $accounts->{$account->name}{"stub_na" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "NA";
     }
   }
   
@@ -777,6 +1019,7 @@ sub consolidate {
     for my $source (keys %sources)
     { $accounts->{$account->name}{"stub_acs"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ACS";
       $accounts->{$account->name}{"stub_intermapper" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
+	  $accounts->{$account->username}{"stub_na" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "NA";
     }
   }
 
@@ -787,13 +1030,26 @@ sub consolidate {
     for my $source (keys %sources)
     { $accounts->{$account->name}{"stub_ise"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ISE";
       $accounts->{$account->name}{"stub_acs"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ACS";
+	  $accounts->{$account->name}{"stub_na" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "NA";
+    }
+  }
+
+  my $na_rs = $self->db->resultset('DsNaUser');
+  $query_rs = $na_rs->search;
+  while (my $account = $query_rs->next)
+  { $naaccounts->{$account->username}{$account->uid} = $account if $account->username;
+    for my $source (keys %sources)
+    { $accounts->{$account->username}{"stub_ise"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ISE";
+      $accounts->{$account->username}{"stub_acs"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ACS";
+      $accounts->{$account->username}{"stub_intermapper"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";	  
     }
   }
 
   my %acs = ();
   my %intermapper = ();
   my %ise = ();
-  for my $db ($acsaccounts, $iseaccounts, $intermapperaccounts)
+  my %na = ();
+  for my $db ($acsaccounts, $iseaccounts, $intermapperaccounts, $naaccounts)
   { for my $key (keys %{$db})
     { for my $uid (keys %{$db->{$key}}) # UIDs = Users
       { if (ref($db->{$key}{$uid}) eq "NG::Schema::Result::DsAcsUser")
@@ -867,6 +1123,35 @@ sub consolidate {
           $accounts->{$db->{$key}{$uid}->name}{"ise"}{$uid}{"source"} = $db->{$key}{$uid}->source;
           $ise{$db->{$key}{$uid}->name} = 1;
         }
+		if (ref($db->{$key}{$uid}) eq "NG::Schema::Result::DsNaUser")
+        { if (!$accounts->{$db->{$key}{$uid}->username}{"name"})
+          { $accounts->{$db->{$key}{$uid}->username}{"name"} = $db->{$key}{$uid}->username;
+            $accounts->{$db->{$key}{$uid}->username}{"password"} = $db->{$key}{$uid}->userpassword;
+          }
+          delete($accounts->{$db->{$key}{$uid}->username}{"stub_na"}{$db->{$key}{$uid}->source->id."-X"});
+          $accounts->{$db->{$key}{$uid}->username}{"password"} ||= "";
+          $accounts->{$db->{$key}{$uid}->username}{"na_status"} = 1;
+		  $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"distinguishedname"} = $db->{$key}{$uid}->distinguishedname; 
+		  $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"aaausername"} = $db->{$key}{$uid}->aaausername;
+		  $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"aaapassword"} = $db->{$key}{$uid}->aaapassword;
+		  $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"userpassword"} = $db->{$key}{$uid}->userpassword;
+		  $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"useaaaloginforproxy"} = bool($db->{$key}{$uid}->useaaaloginforproxy);
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"requireduser"} = bool($db->{$key}{$uid}->requireduser);
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"allowfailover"} = bool($db->{$key}{$uid}->allowfailover);
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"status"} = $db->{$key}{$uid}->status;
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"privilegelevel"} = $db->{$key}{$uid}->privilegelevel;
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"passwordoption"} = $db->{$key}{$uid}->passwordoption;
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"timezone"} = $db->{$key}{$uid}->timezone;
+		  $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"ticketnumber"} = $db->{$key}{$uid}->ticketnumber;
+		  $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"comments"} = $db->{$key}{$uid}->comments;
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"emailaddress"} = $db->{$key}{$uid}->emailaddress; 
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"firstname"} = $db->{$key}{$uid}->firstname;
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"lastname"} = $db->{$key}{$uid}->lastname;        
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"id"} = $db->{$key}{$uid}->userid;
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"uid"} = $db->{$key}{$uid}->uid;
+          $accounts->{$db->{$key}{$uid}->username}{"na"}{$uid}{"source"} = $db->{$key}{$uid}->source;
+          $na{$db->{$key}{$uid}->username} = 1;
+        }
       }
 
       # TODO: FIX THIS AND USE SEPARATE UID TO IDENTIFY CORRECT DATA SOURCE
@@ -880,6 +1165,10 @@ sub consolidate {
         if (ref($sources{$source}) eq "Net::Intermapper")
         { #$intermapper->users(\%intermapper);
         }
+        if (ref($sources{$source}) eq "Net::HP::NA")
+        { #$na->users(\%na);
+        }
+
       }      
     }
   }

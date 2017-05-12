@@ -74,7 +74,7 @@ __PACKAGE__->table("ds_acs_users");
 
   data_type: 'varchar'
   is_nullable: 1
-  size: 64
+  size: 128
 
 =head2 identitygroupname
 
@@ -157,7 +157,7 @@ __PACKAGE__->add_columns(
     original    => { data_type => "varchar" },
   },
   "description",
-  { data_type => "varchar", is_nullable => 1, size => 64 },
+  { data_type => "varchar", is_nullable => 1, size => 128 },
   "identitygroupname",
   { data_type => "varchar", is_foreign_key => 1, is_nullable => 1, size => 16 },
   "enabled",
@@ -235,8 +235,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-04-01 00:33:40
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Yyatymoy5E1e0i8jPdabSw
+# Created by DBIx::Class::Schema::Loader v0.07045 @ 2017-05-11 11:25:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:73K+pgsjcPJqzytIEJjt4A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -10,14 +10,14 @@
                                     <tr>
                                         <th width="2%"><input type="checkbox" id="select_all" name="select_all" value="1"></th>
                                         <th width="10%">User Name</th>
-                                        <th width="5%">ACS 1</th>
-                                        <th width="5%">ISE 2</th>
-                                        <th width="9%">Intermapper 3</th>
-                                        <th width="8%">HP NA 4</th>
-                                        <!--<th width="8%">Cacti 5</th>
-                                        <th width="7%">LDAP 6</th>
-                                        <th width="5%">AD 7</th>
-                                        <th width="7%">Nagios 8</th>-->
+                                        <th width="5%">ACS</th>
+                                        <th width="5%">ISE</th>
+                                        <th width="5%">Intermapper</th>
+                                        <th width="5%">HP NA</th>
+                                        <!--<th width="8%">Cacti</th>
+                                        <th width="7%">LDAP</th>
+                                        <th width="5%">AD</th>
+                                        <th width="7%">Nagios</th>-->
                                         <th width="4%">&nbsp;</th>
                                     </tr>
                                 </thead>
@@ -31,7 +31,7 @@
                                         <td><i class="fa <%= $status->{$account}->{acs} %>" aria-hidden="true"></i></td>
                                         <td><i class="fa <%= $status->{$account}->{ise} %>" aria-hidden="true"></i></td>
                                         <td><i class="fa <%= $status->{$account}->{intermapper} %>" aria-hidden="true"></i></td>
-                                        <td><i class="fa <%= $status->{$account}->{hpna} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $status->{$account}->{na} %>" aria-hidden="true"></i></td>
                                         <!--<td><i class="fa <%= $accounts->{$account}->{cacti} %>" aria-hidden="true"></i></td>
                                         <td><i class="fa <%= $accounts->{$account}->{ldap} %>" aria-hidden="true"></i></td>
                                         <td><i class="fa <%= $accounts->{$account}->{ad} %>" aria-hidden="true"></i></td>

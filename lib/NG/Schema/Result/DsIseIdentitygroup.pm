@@ -57,7 +57,7 @@ __PACKAGE__->table("ds_ise_identitygroup");
 
   data_type: 'varchar'
   is_nullable: 1
-  size: 64
+  size: 128
 
 =head2 description
 
@@ -86,7 +86,7 @@ __PACKAGE__->add_columns(
   "source",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "name",
-  { data_type => "varchar", is_nullable => 1, size => 64 },
+  { data_type => "varchar", is_nullable => 1, size => 128 },
   "description",
   { data_type => "varchar", is_nullable => 1, size => 128 },
   "status",
@@ -145,8 +145,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-04-01 00:33:40
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:SY0Xe5ey3BfJ+TZ2nD1Y1Q
+# Created by DBIx::Class::Schema::Loader v0.07045 @ 2017-05-11 11:25:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:g67TzUTwr5WYed/uWBUlhQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

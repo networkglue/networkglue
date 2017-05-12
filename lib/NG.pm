@@ -5,7 +5,7 @@ use NG::Schema;
 use Net::Cisco::ACS;
 use Net::Intermapper;
 use Net::Cisco::ISE;
-#use Net::HP::NA;
+use Net::HP::NA;
 
 use Crypt::Rijndael;
 use Crypt::CBC;
@@ -32,6 +32,9 @@ sub startup {
                     { $datasources{$sources{$source}->id} =  Net::Intermapper->new(hostname => $sources{$source}->hostname, username => $sources{$source}->username, password => $sources{$source}->password, ssl => $sources{$source}->ssl); }
                     if ($sources{$source}->type->shortname eq "ISE") 
                     { $datasources{$sources{$source}->id} = Net::Cisco::ISE->new(hostname => $sources{$source}->hostname, username => $sources{$source}->username, password => $sources{$source}->password, ssl => $sources{$source}->ssl, debug => 0); }
+                    if ($sources{$source}->type->shortname eq "NA") 
+                    { $datasources{$sources{$source}->id} = Net::HP::NA->new(hostname => $sources{$source}->hostname, username => $sources{$source}->username, password => $sources{$source}->password, ssl => $sources{$source}->ssl, debug => 0); }
+					
                   }
                   return %datasources;
                 });

@@ -3,10 +3,11 @@ use Mojo::Base 'Mojolicious::Controller';
 use NG::Process::ACS;
 use NG::Process::Intermapper;
 use NG::Process::ISE;
+use NG::Process::NA;
 
 use Data::Dumper;
 
-my %valid_datasources = ("acs" => "ACS", "ise" => "ISE", "intermapper" => "Intermapper");
+my %valid_datasources = ("acs" => "ACS", "ise" => "ISE", "intermapper" => "Intermapper", "na" => "NA");
                       
 sub new_form { # GET /datasources/new - form to create a datasource   
   my $self = shift;
@@ -178,16 +179,16 @@ sub synchronize { # GET /datasources/synchronize - Synchronize from DB
   if ($source->type->shortname eq "ACS")
   { my $process = NG::Process::ACS->new("db" => $self->db, "cipher" => $self->cipher, "key" => $self->key, "salt" => $self->salt);
     $process->load_identitygroups;
-    $process->export_identitygroups;
+    #$process->export_identitygroups;
     $process->load_users;
-    $process->export_users;
+    #$process->export_users;
   }
   
   # Clean the GUI logic up
  if ($source->type->shortname eq "Intermapper")
   { my $process = NG::Process::Intermapper->new("db" => $self->db, "cipher" => $self->cipher, "key" => $self->key, "salt" => $self->salt);
     $process->load_users;
-    $process->export_users;
+    #$process->export_users;
   }
   
   # Clean the GUI logic up
@@ -195,11 +196,18 @@ sub synchronize { # GET /datasources/synchronize - Synchronize from DB
   { my $process = NG::Process::ISE->new("db" => $self->db, "cipher" => $self->cipher, "key" => $self->key, "salt" => $self->salt);
     $process->load_identitygroups;
     $process->load_users;
-    $process->export_users;
+    #$process->export_users;
   }
+  # Clean the GUI logic up
+  if ($source->type->shortname eq "NA")
+  { my $process = NG::Process::NA->new("db" => $self->db, "cipher" => $self->cipher, "key" => $self->key, "salt" => $self->salt);
+    #$process->load_identitygroups;
+    $process->load_users;
+    #$process->export_users;
+  }
+
   $self->redirect_to("/datasources/");
 }
-
 
 # This action will render a template
 sub import { # GET /datasources/import - show Import dialog

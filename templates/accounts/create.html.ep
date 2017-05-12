@@ -56,6 +56,9 @@
 % if ($items->{"Intermapper"}) {
   %= include 'accounts/create_intermapper'
 % }
+% if ($items->{"NA"}) {
+  %= include 'accounts/create_na'
+% }
                                 <div class="panel-footer">                                
                                 <div class="form-group">
                                   <div class="col-sm-12">
