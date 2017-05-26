@@ -1,15 +1,5 @@
 \c ng
 
-insert into ds_types (id, shortname, name) values (1, 'ACS', 'Cisco ACS 5.x');
-insert into ds_types (id, shortname, name) values (2, 'Intermapper', 'HelpSystems Intermapper 5.x/6.x');
-insert into ds_types (id, shortname, name) values (3, 'ISE', 'Cisco ISE 2.x');
-insert into ds_types (id, shortname, name) values (4, 'NA', 'HP Network Automation 10.x');
-
-insert into ds_sources(id, type, hostname, username, password, ssl) values (1, 1, '192.168.1.1','user','password',1);
-insert into ds_sources(id, type, hostname, username, password, ssl) values (2, 2, '192.168.1.2','user','password',1);
-insert into ds_sources(id, type, hostname, username, password, ssl) values (3, 3, '192.168.1.3','user','password',1);
-insert into ds_sources(id, type, hostname, username, password, ssl) values (4, 4, '192.168.1.4','user','password',1);
-
 -- From ACS to ACS 
 -- insert into mappings(id, source_ds, source_table, source_field, destination_ds, destination_table, destination_field, overwriteflag, appendflag, createflag) values (1, 1,'Users','dynamic: name',2,'Users','dynamic: name', '0', '0', '1');
 
@@ -34,6 +24,11 @@ insert into mappings(id, source_ds, source_table, source_field, destination_ds, 
 insert into mappings(id, source_ds, source_table, source_field, destination_ds, destination_table, destination_field, overwriteflag, appendflag, createflag) values (12, 1,'Users','dynamic: name',2,'Users','dynamic: external "1"','1', '0', '1');
 
 insert into mappings(id, source_ds, source_table, source_field, destination_ds, destination_table, destination_field, overwriteflag, appendflag, createflag) values (13, 1,'Users','dynamic: name',3,'Users','dynamic: name', '0', '0', '1');
+
+insert into ds_types (id, shortname, name) values (1, 'ACS', 'Cisco ACS 5.x');
+insert into ds_types (id, shortname, name) values (2, 'Intermapper', 'HelpSystems Intermapper 5.x/6.x');
+insert into ds_types (id, shortname, name) values (3, 'ISE', 'Cisco ISE 2.x');
+insert into ds_types (id, shortname, name) values (4, 'NA', 'HP Network Automation 10.x');
 
 insert into ds_tables (id, type, coretable, name, tablepk) values (1, 1, 'accounts', 'users', 'name');
 insert into ds_tables (id, type, coretable, name, tablepk) values (2, 2, 'accounts', 'users', 'name');

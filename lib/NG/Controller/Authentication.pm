@@ -6,7 +6,7 @@ my %valid_authentications = ("tacacs" => "TACACS+", "radius" => "RADIUS");
                       
 sub new_form { # GET /authentication/new - form to create an authentication    
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $target = lc($self->param("target"));
   my $filter = "";
   $self->stash(filter => $filter);
@@ -24,7 +24,7 @@ sub new_form { # GET /authentication/new - form to create an authentication
 # This action will render a template
 sub show { # GET /authentication/123 - show authentication with id 123
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");
   my $filter = "";
   my $filterheader = "";
@@ -49,14 +49,14 @@ sub show { # GET /authentication/123 - show authentication with id 123
 
 sub edit_form { # GET /authentication/123/edit - form to update an authentication 
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");  
 }
 
 # This action will render a template
 sub index { # GET /authentication - list of all authentications
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $rs = $self->db->resultset('Authentication');
   my $query_rs = $rs->search();
   my $authentications = {};
@@ -78,7 +78,7 @@ sub index { # GET /authentication - list of all authentications
 
 sub create { # POST /authentication - create new authentication 
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   
   my $hostname = $self->param("hostname");
   my $authkey = $self->param("authkey");
@@ -113,7 +113,7 @@ sub create { # POST /authentication - create new authentication
 
 sub update { # PUT /authentication/123 - update a authentication 
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $rs = $self->db->resultset('Authentication');
   my $query_rs = $rs->search();
   my $authentications = {};
@@ -134,7 +134,7 @@ sub update { # PUT /authentication/123 - update a authentication
 
 sub delete { # DELETE /authentication/123 - delete a authentication 
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $rs = $self->db->resultset('Authentication');
   my $query_rs = $rs->search();
   my $authentications = {};

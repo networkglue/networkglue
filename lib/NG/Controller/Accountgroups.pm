@@ -4,16 +4,13 @@ use Data::Dumper;
 use Net::Cisco::ACS::User;
 use Net::Cisco::ISE::InternalUser;
 use Net::Intermapper::User;
-
-my $items = { "acs" => "ACS",
-              "ise" => "ISE",
-              "intermapper" => "Intermapper",
-             };
+use Net::HP::NA::User;
 
 my $accountgroups = {};
 my $acsaccountgroups = {};
 my $iseaccountgroups = {};
 my $intermapperaccountgroups = {};
+my $naaccountgroups = {};
 
 my $status_clean = 0;
 my $status_changed = 1;
@@ -23,11 +20,40 @@ my $status_created = 2;
 
 sub new_form { # GET /accountgroups/new - form to create an accountgroup
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');  
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');  
   my $filter = "";
   $self->stash(filter => $filter);
-  $self->stash(items => $items);  
+  $self->stash(items => $self->items);  
   my $username = $self->session('username');
+  $self->stash(username => $username);
+  
+  my %acs_toggle = ();
+  my %ise_toggle = ();
+  my %im_toggle = ();
+  my %na_toggle = ();
+  
+  my $sources_rs = $self->db->resultset('DsSource');
+  my $query_rs = $sources_rs->search;
+  my %sources = ();
+
+  while (my $source = $query_rs->next)
+  { $sources{$source->id} = $source;
+  }
+
+  my $accountgroup = {};  
+  for my $source (keys %sources)
+  { $accountgroup->{"stub_ise"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ISE";
+    $accountgroup->{"stub_acs"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ACS";
+    $accountgroup->{"stub_intermapper"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
+	$accountgroup->{"stub_na"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "NA";
+  }
+
+  $self->stash(accountgroup => $accountgroup);
+  
+  $self->stash(acs_toggle => \%acs_toggle);
+  $self->stash(ise_toggle => \%ise_toggle);
+  $self->stash(im_toggle => \%im_toggle);
+  $self->stash(na_toggle => \%na_toggle);
   $self->stash(username => $username);
 
   $self->render('accountgroups/create', layout => 'accountgroups');
@@ -36,25 +62,50 @@ sub new_form { # GET /accountgroups/new - form to create an accountgroup
 # This action will render a template
 sub show { # GET /accountgroups/123 - show account group with id 123
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");
-  my $filter = $self->param('filter');
+  my $filter = lc($self->param("filter"));
   $self->consolidate() unless keys %{ $accountgroups };
   my $accountgroup = $accountgroups->{$id};
+  
   $self->stash(accountgroup => $accountgroup);
   my $filterheader = "";
 
-  my $acs_toggle = $accountgroup->{"acs"} && $accountgroup->{"acs"} ne "fa-close text-danger" ? " checked" : "";
-  my $ise_toggle = $accountgroup->{"ise"} && $accountgroup->{"ise"} ne "fa-close text-danger" ? " checked" : "";
-  my $im_toggle = $accountgroup->{"intermapper"} && $accountgroup->{"intermapper"} ne "fa-close text-danger" ? " checked" : "";
+  my $sources_rs = $self->db->resultset('DsSource');
+  my $query_rs = $sources_rs->search;
+  my $sources = {};
+  my %acs_toggle = ();
+  my %ise_toggle = ();
+  my %im_toggle = ();
+  my %na_toggle = ();
+  
+  while (my $source = $query_rs->next)
+  { $sources->{$source->id} = $source->type->shortname;
+  }
 
-  $self->stash(acs_toggle => $acs_toggle);
-  $self->stash(ise_toggle => $ise_toggle);
-  $self->stash(im_toggle => $im_toggle);
+  for my $target (sort keys %{$sources})
+  { if ($sources->{$target} eq "ACS")
+    { $acs_toggle{$target} = $accountgroup->{"acs"} && $accountgroup->{"acs"} ne "fa-close text-danger" ? " checked" : "";
+    }
+    if ($sources->{$target} eq "ISE")
+    { $ise_toggle{$target} = $accountgroup->{"ise"} && $accountgroup->{"ise"} ne "fa-close text-danger" ? " checked" : "";
+    }
+    
+    if ($sources->{$target} eq "Intermapper")
+    { $im_toggle{$target} = $accountgroup->{"intermapper"} && $accountgroup->{"intermapper"} ne "fa-close text-danger" ? " checked" : "";
+    }
+    if ($sources->{$target} eq "NA")
+    { $na_toggle{$target} = $accountgroup->{"na"} && $accountgroup->{"na"} ne "fa-close text-danger" ? " checked" : "";
+    }
+  }
+
+  $self->stash(acs_toggle => \%acs_toggle);
+  $self->stash(ise_toggle => \%ise_toggle);
+  $self->stash(im_toggle => \%im_toggle);
+  $self->stash(na_toggle => \%na_toggle);
   my $username = $self->session('username');
   $self->stash(username => $username);
-
-  $self->stash(items => $items);
+  $self->stash(items => $self->items);
   $self->stash(filterheader => $filterheader);
   $filter = "?filter=$filter" if $filter;
   $self->stash(filter => $filter);
@@ -67,14 +118,14 @@ sub edit_form { # GET /accountgroups/123/edit - form to update an accountgroup
 
 sub index { # GET /accountgroups - list of all accountgroups
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');  
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');  
   $self->consolidate();
-  my $filter = $self->param('filter');
+  my $filter = lc($self->param("filter"));
   my %accountgroups = %{ $accountgroups };
   my %status = ();
   for my $accountgroup (keys %accountgroups)
   { #for my $key (qw(acs ise ad ldap nagios hpna intermapper cacti))
-    for my $key (qw(acs ise intermapper))
+    for my $key (qw(acs ise intermapper na))
     { #$accountgroups->{$accountgroup}{$key} = ($accountgroups->{$accountgroup}{$key} && $accountgroups->{$accountgroup}{$key} ne "fa-close text-danger") ? "fa-check text-success" : "fa-close text-danger"; 
 	  $status{$accountgroup}{$key} = ($accountgroups->{$accountgroup}{$key} && $accountgroups->{$accountgroup}{$key} ne "fa-close text-danger") ? "fa-check text-success" : "fa-close text-danger"; 
     }
@@ -84,11 +135,11 @@ sub index { # GET /accountgroups - list of all accountgroups
   my $filterheader = "";
   if ($filter)
   { my %accountgroups = %{ $accountgroups };
-    my @keys = grep { $accountgroups->{$_}{$filter} ne "fa-close text-danger" } keys %accountgroups;
+    my @keys = grep { $status{$_}{$filter} ne "fa-close text-danger" } keys %accountgroups;
     my %filteraccountgroups = ();
     @filteraccountgroups{@keys} = @accountgroups{@keys};
     $self->stash(accountgroups => \%filteraccountgroups);
-    $filterheader = $self->items->{$filter}->type->shortname ." Account Group - ";
+    $filterheader = $self->items->{$filter}->type->shortname ." Account Group - " if $self->items->{$filter};
   } else
   {  $self->stash(accountgroups => $accountgroups); }
   my $username = $self->session('username');
@@ -103,7 +154,7 @@ sub index { # GET /accountgroups - list of all accountgroups
 
 sub create { # POST /accountgroups - create new account group
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');  
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');  
   my $name = $self->param("name");
   my $password = $self->param("password");
   $self->db->resultset('Accountgroup')->create({
@@ -122,6 +173,10 @@ sub create { # POST /accountgroups - create new account group
   $query_rs = $ise_rs->search({ name => "__default" });
   my $defaultise = $query_rs->first;
 
+  my $na_rs = $self->db->resultset('DsNaGroup');
+  $query_rs = $na_rs->search({ usergroupname => "__default" });
+  my $defaultna = $query_rs->first;
+  
   # Temporary fix
   my $acsmax = $self->db->resultset('DsAcsIdentitygroup')->get_column('Id');
   my $acsmaxid = $acsmax->max;
@@ -136,9 +191,16 @@ sub create { # POST /accountgroups - create new account group
   my $immax = $self->db->resultset('DsIntermapperUser')->get_column('Id');
   my $immaxid = $immax->max;
   $immaxid++;
+
+  # Temporary fix
+  my $namax = $self->db->resultset('DsNaGroup')->get_column('usergroupid');
+  my $namaxid = $namax->max;
+  $namaxid++;
   
   my $acs_toggle = $self->param("acs_toggle") || "0";
   my $im_toggle = $self->param("im_toggle") || "0";
+  my $ise_toggle = $self->param("ise_toggle") || "0";
+  my $na_toggle = $self->param("na_toggle") || "0";
           
   my $acs_description = $self->param("acs_description");
   if ($defaultacs)
@@ -165,7 +227,7 @@ sub create { # POST /accountgroups - create new account group
 
 sub update { # PUT /accountgroups/123 - update an account group
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');  
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');  
   my $id = $self->param("id");
   my $acs_id = $self->param("acs_id");
 
@@ -251,11 +313,10 @@ sub update { # PUT /accountgroups/123 - update an account group
   
   if ($intermapper_id && $im_toggle)
   { my $intermapper_rs = $self->db->resultset('DsIntermapperUser');
-    $self->app->log->debug("Update $intermapper_id - $im_toggle");
     my $query_rs = $intermapper_rs->search();
     #my %groups = ();
     while (my $accountgroup = $query_rs->next)
-    { my @groups = split(/\,/,$accountgroup);
+    { my (@groups) = split(/\,/,$accountgroup);
       #for my $group (@groups)
       #{ $groups{$group}++;
       #}
@@ -272,7 +333,6 @@ sub update { # PUT /accountgroups/123 - update an account group
       status => $status_created
       # TODO: CLEANUP!
     });
-    #$self->app->log->debug("Create $intermapper_id - $im_toggle");
   }
   
   # IM group exists, has to be deleted
@@ -280,7 +340,7 @@ sub update { # PUT /accountgroups/123 - update an account group
   { my $intermapper_rs = $self->db->resultset('DsIntermapperUser');
     my $query_rs = $intermapper_rs->search();
     while (my $accountgroup = $query_rs->next)
-    { my @groups = split(/\,/,$accountgroup->groups);
+    { my (@groups) = split(/\,/,$accountgroup->groups);
       for my $i (0..$#groups)
       { if ($groups[$i] eq $name)
         { delete($groups[$i]);
@@ -291,7 +351,6 @@ sub update { # PUT /accountgroups/123 - update an account group
     }
     delete($intermapperaccountgroups->{$id});
     $accountgroups->{$id}{"intermapper"} = 0;
-    #$self->app->log->debug("Delete $intermapper_id - $im_toggle");    
   }
 
   $self->consolidate();
@@ -302,7 +361,7 @@ sub update { # PUT /accountgroups/123 - update an account group
 
 sub delete { # DELETE /accountgroups/123 - delete a account group
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');  
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');  
   my $id = $self->param("id");
   my @extraid = @ { $self->every_param("extraid") };
   unshift(@extraid, $id);
@@ -333,14 +392,17 @@ sub delete { # DELETE /accountgroups/123 - delete a account group
 
 sub consolidate {
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
-  my %datasources = $self->datasources;
-  my $acs = $datasources{"acs"};
-  my $intermapper = $datasources{"intermapper"};
-  $accountgroups = {};
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
+  my $sources_rs = $self->db->resultset('DsSource');
+  my $query_rs = $sources_rs->search;
+  my %sources = ();
+  $accountgroups = {};  
+
+  while (my $source = $query_rs->next)
+  { $sources{$source->id} = $source; }
 
   my $accountgroup_rs = $self->db->resultset('Accountgroup');
-  my $query_rs = $accountgroup_rs->search;
+  $query_rs = $accountgroup_rs->search;
   while (my $accountgroup = $query_rs->next)
   { $accountgroups->{$accountgroup->name}{"name"} = $accountgroup->name if $accountgroup->name;
   }
@@ -348,81 +410,139 @@ sub consolidate {
   my $acs_rs = $self->db->resultset('DsAcsIdentitygroup');
   $query_rs = $acs_rs->search;
   while (my $accountgroup = $query_rs->next)
-  { $acsaccountgroups->{$accountgroup->name} = $accountgroup if $accountgroup->name;
+  { $acsaccountgroups->{$accountgroup->name}{$accountgroup->uid} = $accountgroup if $accountgroup->name;
+    for my $source (keys %sources)
+    { $accountgroups->{$accountgroup->name}{"stub_ise"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ISE";
+      $accountgroups->{$accountgroup->name}{"stub_intermapper" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
+	  $accountgroups->{$accountgroup->name}{"stub_na" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "NA";
+    }
   }
   
   my $ise_rs = $self->db->resultset('DsIseIdentitygroup');
   $query_rs = $ise_rs->search;
   while (my $accountgroup = $query_rs->next)
-  { $iseaccountgroups->{$accountgroup->name} = $accountgroup if $accountgroup->name; 
+  { $iseaccountgroups->{$accountgroup->name}{$accountgroup->uid} = $accountgroup if $accountgroup->name;
+    for my $source (keys %sources)
+    { $accountgroups->{$accountgroup->name}{"stub_acs"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ACS";
+      $accountgroups->{$accountgroup->name}{"stub_intermapper" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
+	  $accountgroups->{$accountgroup->name}{"stub_na" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "NA";
+    }
   }
 
   my $intermapper_rs = $self->db->resultset('DsIntermapperUser');
   $query_rs = $intermapper_rs->search;
   while (my $accountgroup = $query_rs->next)
-  { $intermapperaccountgroups->{$accountgroup->groups} = $accountgroup if $accountgroup->groups;
+  { my (@groups) = split(/\,/,$accountgroup->groups) if $accountgroup->groups;
+    for my $group (@groups)
+	{ $group =~ s/^\s*//g;
+	  $group =~ s/\s*$//g;
+	  my $altgroup = $group;
+	  $altgroup =~ s/\s/_/g;
+	  $intermapperaccountgroups->{$group}{$accountgroup->source->id."-".$altgroup} = $accountgroup;
+      for my $source (keys %sources)
+      { $accountgroups->{$group}{"stub_ise"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ISE";
+        $accountgroups->{$group}{"stub_acs"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ACS";
+	    $accountgroups->{$group}{"stub_na" }{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "NA";
+      }
+	}
   }
 
-  my %acs = ();
-  my %intermapper = ();
-  for my $db ($acsaccountgroups,$iseaccountgroups, $intermapperaccountgroups)
-  { for my $key (keys %{$db})
-    { if (ref($db->{$key}) eq "NG::Schema::Result::DsAcsIdentitygroup")
-      { if (!$accountgroups->{$db->{$key}->name}{"name"})
-        { $accountgroups->{$db->{$key}->name}{"name"} = $db->{$key}->name;
-          $accountgroups->{$db->{$key}->name}{"description"} = $db->{$key}->description || "";
-        }
-        $accountgroups->{$db->{$key}->name}{"description"} ||= "";
-        
-        $accountgroups->{$db->{$key}->name}{"acs"} = 1;
-        $accountgroups->{$db->{$key}->name}{"acs_description"} = $db->{$key}->description;
-        $accountgroups->{$db->{$key}->name}{"acs_id"} = $db->{$key}->id;
-        
-        my $acs_identitygroup = Net::Cisco::ACS::IdentityGroup->new("name"=>$db->{$key}->name,
-                                                  "description"=>$accountgroups->{$db->{$key}->name}{"acs_description"});
-        $acs{$db->{$key}->name}  = $acs_identitygroup;
-      }
-      if (ref($db->{$key}) eq "NG::Schema::Result::DsIntermapperUser")
-      { my @groups = split(/\,/,$db->{$key}->groups);
-        for my $group (@groups)
-        { if (!$accountgroups->{$group}{"name"})
-          { $accountgroups->{$group}{"name"} = $group;
-          }
-          $accountgroups->{$group}{"intermapper"} = 1;
-          $accountgroups->{$group}{"intermapper_id"} = $group;
-        }
-
-        #my $intermapper_user = Net::Intermapper::User->new("Name"=>"_____dummy",
-        #                                                   "Groups"=>$accountgroups->{$db->{$key}->name}{"intermapper_groups"});
-        #$intermapper{$db->{$key}->groups}  = $intermapper_user;
-      }
-
-      if (ref($db->{$key}) eq "NG::Schema::Result::DsIseIdentitygroup")
-      { if (!$accountgroups->{$db->{$key}->name}{"name"})
-        { $accountgroups->{$db->{$key}->name}{"name"} = $db->{$key}->name;
-          $accountgroups->{$db->{$key}->name}{"description"} = $db->{$key}->description || "";
-        }
-        
-        $accountgroups->{$db->{$key}->name}{"description"} ||= "";
-        
-        $accountgroups->{$db->{$key}->name}{"ise"} = 1;
-        $accountgroups->{$db->{$key}->name}{"ise_id"} = $db->{$key}->id;
-      }
-      # TODO: FIX THIS AND USE SEPARATE UID TO IDENTIFY CORRECT DATA SOURCE
-      for my $source (keys %datasources)
-      { if (ref($datasources{$source}) eq "Net::Cisco::ACS")
-        { #$acs->users(users => \%acs);
-        }
-        if (ref($datasources{$source}) eq "Net::Cisco::ISE")
-        { #$ise->internalusers(internalusers => \%ise);
-        }
-        if (ref($datasources{$source}) eq "Net::Intermapper")
-        { #$intermapper->users(\%intermapper);
-        }
-      }      
+  my $na_rs = $self->db->resultset('DsNaGroup');
+  $query_rs = $na_rs->search;
+  while (my $accountgroup = $query_rs->next)
+  { $naaccountgroups->{$accountgroup->username}{$accountgroup->uid} = $accountgroup if $accountgroup->username;
+    for my $source (keys %sources)
+    { $accountgroups->{$accountgroup->name}{"stub_ise"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ISE";
+      $accountgroups->{$accountgroup->name}{"stub_acs"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "ACS";
+      $accountgroups->{$accountgroup->name}{"stub_intermapper"}{$sources{$source}->id."-X"}{"source"} = $sources{$source} if $sources{$source}->type->shortname eq "Intermapper";
     }
   }
-  #$self->app->log->debug(Dumper \$accounts);
+  my %acs = ();
+  my %intermapper = ();
+  my %ise = ();
+  my %na = ();
+  for my $db ($acsaccountgroups,$iseaccountgroups, $intermapperaccountgroups,$naaccountgroups)
+  { for my $key (keys %{$db})
+    { for my $uid (keys %{$db->{$key}}) # UIDs = Users
+      { if (ref($db->{$key}{$uid}) eq "NG::Schema::Result::DsAcsIdentitygroup")
+		{ #if (!$accountgroups->{$db->{$key}{$uid}->name}{"name"})
+		  { $accountgroups->{$db->{$key}{$uid}->name}{"name"} = $db->{$key}{$uid}->name;
+		    $accountgroups->{$db->{$key}{$uid}->name}{"description"} = $db->{$key}{$uid}->description || "";
+		  }
+		  delete($accountgroups->{$db->{$key}{$uid}->name}{"stub_acs"}{$db->{$key}{$uid}->source->id."-X"});
+          $accountgroups->{$db->{$key}{$uid}->name}{"description"} ||= $db->{$key}{$uid}->description;
+          $accountgroups->{$db->{$key}{$uid}->name}{"acs"}{$uid}{"id"} = $db->{$key}{$uid}->id;
+          $accountgroups->{$db->{$key}{$uid}->name}{"acs"}{$uid}{"uid"} = $db->{$key}{$uid}->uid;
+          $accountgroups->{$db->{$key}{$uid}->name}{"acs"}{$uid}{"source"} = $db->{$key}{$uid}->source;
+          $acs{$db->{$key}{$uid}->name}  = 1;
+          #my $acs_identitygroup = Net::Cisco::ACS::IdentityGroup->new("name"=>$db->{$key}{$uid}->name,
+          #                                        "description"=>$accountgroups->{$db->{$key}{$uid}->name}{"acs_description"});
+          #$acs{$db->{$key}{$uid}->name}  = $acs_identitygroup;
+		}
+		if (ref($db->{$key}{$uid}) eq "NG::Schema::Result::DsIntermapperUser")
+		{ my (@groups) = split(/\,/,$db->{$key}{$uid}->groups);
+		  for my $group (@groups)
+          { #if (!$accountgroups->{$group}{"name"})
+		    $group =~ s/^\s*//g;
+			$group =~ s/\s*$//g;
+		    if ($group)
+            { $accountgroups->{$group}{"name"} = $group;
+              delete($accountgroups->{$group}{"stub_intermapper"}{$db->{$key}{$uid}->source->id."-X"});
+              $accountgroups->{$group}{"intermapper"}{$uid}{"name"} = $group;
+              $accountgroups->{$group}{"intermapper"}{$uid}{"uid"} = $uid;
+              $accountgroups->{$group}{"intermapper"}{$uid}{"id"} = $db->{$key}{$uid}->id;
+              $accountgroups->{$group}{"intermapper"}{$uid}{"source"} = $db->{$key}{$uid}->source;
+			  $intermapper{$group} = 1;
+			}
+          }
+          #my $intermapper_user = Net::Intermapper::User->new("Name"=>"_____dummy",
+          #                                                   "Groups"=>$accountgroups->{$db->{$key}->name}{"intermapper_groups"});
+          #$intermapper{$db->{$key}->groups}  = $intermapper_user;
+        }
+      
+        if (ref($db->{$key}{$uid}) eq "NG::Schema::Result::DsIseIdentitygroup")
+        { #if (!$accountgroups->{$db->{$key}{$uid}->name}{"name"})
+          { $accountgroups->{$db->{$key}{$uid}->name}{"name"} = $db->{$key}{$uid}->name;
+            $accountgroups->{$db->{$key}{$uid}->name}{"description"} = $db->{$key}{$uid}->description || "";
+          }
+	      delete($accountgroups->{$db->{$key}{$uid}->name}{"stub_ise"}{$db->{$key}{$uid}->source->id."-X"});
+          $accountgroups->{$db->{$key}{$uid}->name}{"description"} ||= "";
+          $accountgroups->{$db->{$key}{$uid}->name}{"ise"}{$uid}{"id"} = $db->{$key}{$uid}->id;
+          $accountgroups->{$db->{$key}{$uid}->name}{"ise"}{$uid}{"uid"} = $db->{$key}{$uid}->uid;
+          $accountgroups->{$db->{$key}{$uid}->name}{"ise"}{$uid}{"source"} = $db->{$key}{$uid}->source;
+          $ise{$db->{$key}{$uid}->name} = 1;
+
+        }
+        if (ref($db->{$key}{$uid}) eq "NG::Schema::Result::DsNaGroup")
+        { #if (!$accountgroups->{$db->{$key}{$uid}->name}{"name"})
+          { $accountgroups->{$db->{$key}{$uid}->name}{"name"} = $db->{$key}{$uid}->name;
+            $accountgroups->{$db->{$key}{$uid}->name}{"description"} = $db->{$key}{$uid}->description || "";
+          }
+		  delete($accountgroups->{$db->{$key}{$uid}->name}{"stub_na"}{$db->{$key}{$uid}->source->id."-X"});
+          $accountgroups->{$db->{$key}{$uid}->name}{"na"}{$uid}{"id"} = $db->{$key}{$uid}->userid;
+          $accountgroups->{$db->{$key}{$uid}->name}{"na"}{$uid}{"uid"} = $db->{$key}{$uid}->uid;
+          $accountgroups->{$db->{$key}{$uid}->name}{"na"}{$uid}{"source"} = $db->{$key}{$uid}->source;
+          $na{$db->{$key}{$uid}->name} = 1;
+        }
+	  }
+
+      # TODO: FIX THIS AND USE SEPARATE UID TO IDENTIFY CORRECT DATA SOURCE
+      for my $source (keys %sources)
+      { if (ref($sources{$source}) eq "Net::Cisco::ACS")
+        { #$acs->users(users => \%acs);
+        }
+        if (ref($sources{$source}) eq "Net::Cisco::ISE")
+        { #$ise->internalusers(internalusers => \%ise);
+        }
+        if (ref($sources{$source}) eq "Net::Intermapper")
+        { #$intermapper->users(\%intermapper);
+        }
+        if (ref($sources{$source}) eq "Net::HP::NA")
+        { #$na->users(\%na);
+        }
+	  }
+	}
+  }
 }
 
 sub bool

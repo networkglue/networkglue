@@ -303,7 +303,7 @@ CREATE TABLE ds_na_users
 ) WITH (
   OIDS=TRUE
 );
-ALTER TABLE ds_acs_users
+ALTER TABLE ds_na_users
   OWNER TO ngpguser;
 
 CREATE TABLE ds_na_groups

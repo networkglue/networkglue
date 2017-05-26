@@ -151,7 +151,7 @@ sub load_identitygroups
             { description => $identitygroups{$identitygroup}->description, name => $identitygroups{$identitygroup}->name, source => $sourceid,
               status => $status, id => $identitygroups{$identitygroup}->id, uid => $sourceid."-".$identitygroups{$identitygroup}->id
             });
-      }
+			}
   
       if ($iseidentitygroups{$identitygroup})
       { my $status = $status_synchronized;

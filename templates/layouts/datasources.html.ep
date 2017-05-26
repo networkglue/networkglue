@@ -104,6 +104,7 @@
                 <a tabindex="-1" href="#"><i class="fa fa-fw fa-plus"></i> Add</a>
                 <ul class="dropdown-menu">
                   <li><a tabindex="-1" href="/datasources/new/acs"><i class="fa fa-fw fa-database"></i> ACS</a></li>
+                  <li><a href="/datasources/new/na"><i class="fa fa-fw fa-database"></i> Network Automation</a></li>
                   <li><a href="/datasources/new/ise"><i class="fa fa-fw fa-database"></i> ISE</a></li>
                   <li><a href="/datasources/new/intermapper"><i class="fa fa-fw fa-database"></i> Intermapper</a></li>
                 </ul>

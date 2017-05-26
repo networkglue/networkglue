@@ -120,12 +120,50 @@
     <link href="/css/bootstrap-toggle.min.css" rel="stylesheet">
     <script src="/js/bootstrap-toggle.min.js"></script>
     <script>
-        $(document).ready(function(){
-          $('#acs_dateexceeds').datepicker();
+		function generate_tags(uid, flag)
+		{ var vartags = '';
+		  var select = '';
+		  if (flag != 1)
+		  { select = $( "#intermapper_groups_"+uid+" option:selected" ).text(); }
+		  if (select != '') { vartags = select+","; }
+		  vartags += $("#intermapper_groups_raw_"+uid).val();
+		  $("#intermapper_groups_raw_"+uid).val(vartags);
+		  var tags = vartags.split(',');
+		  var t = "";
+		  for (var i = 0; i < tags.length; i++) 
+		  { if (tags[i] == '') { break; }
+			t += "<span class=\"tag label label-info\">"+tags[i]+"&nbsp;&nbsp;<a onClick=\"intermapper_remove(\'"+uid+"\',\'"+i+"\')\"><i class=\"remove glyphicon glyphicon-remove-sign glyphicon-white\"></i></a></span>&nbsp;";
+		  }
+		  $("#intermapper_tags_"+uid).html(t);
+		}
+
+		function intermapper_remove(uid, g)
+		{ var vartags = $("#intermapper_groups_raw_"+uid).val();
+		  var tags = vartags.split(',');
+	      tags.splice(g, 1);
+	      var t = tags.join(',');
+		  
+	      $("#intermapper_groups_raw_"+uid).val(t);
+	      generate_tags(uid,1);
+		}
+		
+		$(document).ready(function(){
+		 $('#acs_dateexceeds').datepicker();
           $('#ise_expirydate').datepicker();
           $('.input-group.date').datepicker();
           $('.input-group.date').datepicker();
-          
+		  $( ".intermapper_group_select").change(function() 
+		  { var id = this.id; 
+		    var uid = id.replace("intermapper_groups_","");
+			generate_tags(uid,0);
+		  });
+
+		  $('.intermapper_group_select').each(function () 
+		  { var id = this.id; 
+		    var uid = id.replace("intermapper_groups_","");
+			generate_tags(uid,0);
+		  });
+		  
           $(document).on('show','.accordion', function (e) {
           $(e.target).prev('.collapse').addClass('glyphicon-chevron-up');
           });
@@ -189,7 +227,6 @@
           $(target).attr('type', 'text');
           return pass;
         }
-                        
     </script>
 </head>
 

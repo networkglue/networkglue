@@ -11,7 +11,7 @@ my %valid_datasources = ("acs" => "ACS", "ise" => "ISE", "intermapper" => "Inter
                       
 sub new_form { # GET /datasources/new - form to create a datasource   
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $filter = "";
   $self->stash(filter => $filter);
   $self->stash(items => $self->items);  
@@ -29,7 +29,7 @@ sub new_form { # GET /datasources/new - form to create a datasource
 # This action will render a template
 sub show { # GET /datasources/123 - show datasource with id 123
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");
 
   my $filter = "";
@@ -57,14 +57,14 @@ sub show { # GET /datasources/123 - show datasource with id 123
 
 sub edit_form { # GET /datasources/123/edit - form to update a datasource
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");  
 }
 
 # This action will render a template
 sub index { # GET /datasources - list of all datasources
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $rs = $self->db->resultset('DsSource');
   my $query_rs = $rs->search();
   my $datasources = {};
@@ -86,7 +86,7 @@ sub index { # GET /datasources - list of all datasources
 
 sub create { # POST /datasources - create new datasource
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   
   my $hostname = $self->param("hostname");
   my $priority = $self->param("priority");
@@ -126,7 +126,7 @@ sub create { # POST /datasources - create new datasource
 
 sub update { # PUT /datasources/123 - update a datasource
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $rs = $self->db->resultset('DsSource');
   my $query_rs = $rs->search();
   my $datasources = {};
@@ -153,7 +153,7 @@ sub update { # PUT /datasources/123 - update a datasource
 
 sub delete { # DELETE /datasources/123 - delete a datasource
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $rs = $self->db->resultset('DsSource');
   my $query_rs = $rs->search();
   my $datasources = {};
@@ -171,7 +171,7 @@ sub delete { # DELETE /datasources/123 - delete a datasource
 
 sub synchronize { # GET /datasources/synchronize - Synchronize from DB 
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");
   my $rs = $self->db->resultset('DsSource');
   my $query_rs = $rs->search( { id => $id });
@@ -212,7 +212,7 @@ sub synchronize { # GET /datasources/synchronize - Synchronize from DB
 # This action will render a template
 sub import { # GET /datasources/import - show Import dialog
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $rs = $self->db->resultset('DsSource');
   my $filter = "";
   my $filterheader = "";

@@ -18,12 +18,16 @@
                                     <label for="intermappergroups" class="col-sm-4 control-label">Groups</label>
 
                                     <div class="input-group col-sm-8">
-                                        <select class="form-control" id="intermapper_groups" name="intermapper_groups_<%= $uid %>">
+                                        <select class="form-control intermapper_group_select" id="intermapper_groups_<%= $uid %>" name="intermapper_groups_<%= $uid %>">
                 % foreach my $imidgroup (sort keys %{$imidgroups-> { $account->{"intermapper"}{$uid}{"source"}->id }}) {
-                                            <option value="<%= $imidgroup %>"<%= $imidgroups->{ $account->{"intermapper"}{$uid}{"source"}->id }{$imidgroup}{"selected"} %>><%= $imidgroups->{ $account->{"intermapper"}{$uid}{"source"}->id }{$imidgroup}{"name"} %></option>
+                                            <option value="<%= $imidgroup %>"><%= $imidgroups->{ $account->{"intermapper"}{$uid}{"source"}->id }{$imidgroup}{"name"} %></option>
 % }
-
                                         </select>
+									</div>	
+									<div class="input-group col-sm-4"></div>
+									<div class="input-group col-sm-8">
+									<input type="hidden" id="intermapper_groups_raw_<%= $uid %>" value="<%= $account->{"intermapper"}{$uid}{"groups"} %>">
+									<h4 style="display:inline; margin-top: 2px" id="intermapper_tags_<%= $uid %>"></h4>
                                     </div>
                                 </div>
 

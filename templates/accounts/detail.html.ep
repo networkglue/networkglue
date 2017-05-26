@@ -1,5 +1,5 @@
                    <!-- Page Heading -->
-                <div class="row"><h3>Accounts <small>Details</small></h2><hr></div>
+                <div class="row"><h3>Accounts <small>Details</small></h3><hr></div>
 
                 <div class="row">
                     
@@ -57,7 +57,6 @@
 % if ($items->{"Intermapper"}) {
   %= include 'accounts/detail_intermapper'
 % }
-
 % if ($items->{"NA"}) {
   %= include 'accounts/detail_na'
 % }

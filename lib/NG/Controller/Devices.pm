@@ -10,7 +10,7 @@ for (1..100)
 
 sub new_form { # GET /devices/new - form to create a device   
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $filter = "";
   $self->stash(filter => $filter);
   $self->stash(items => $self->items);  
@@ -23,7 +23,7 @@ sub new_form { # GET /devices/new - form to create a device
 # This action will render a template
 sub show { # GET /devices/123 - show device with id 123
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");
   my $device = $devices->{$id};
 
@@ -42,14 +42,14 @@ sub show { # GET /devices/123 - show device with id 123
 
 sub edit_form { # GET /devices/123/edit - form to update a device
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");  
 }
 
 # This action will render a template
 sub index { # GET /devices - list of all devices
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $filter = $self->param('filter');
   my %devices = %{ $devices };
   for my $device (keys %devices)
@@ -78,7 +78,7 @@ sub index { # GET /devices - list of all devices
 
 sub create { # POST /devices - create new account
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $hostname = $self->param("hostname");
   my $description = $self->param("description");
   my $ipaddress = $self->param("ipaddress");
@@ -95,7 +95,7 @@ sub create { # POST /devices - create new account
 
 sub update { # PUT /devices/123 - update a device
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");
   my $hostname = $self->param("hostname");
   my $description = $self->param("description");
@@ -108,7 +108,7 @@ sub update { # PUT /devices/123 - update a device
 
 sub delete { # DELETE /devices/123 - delete a device
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");    
   delete($devices->{$id});
   $self->redirect_to("/devices/");

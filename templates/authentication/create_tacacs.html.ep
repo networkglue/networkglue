@@ -31,7 +31,7 @@
                                 <div class="form-group">
                                     <label for="authkey" class="col-sm-4 control-label">Authentication Key</label>
                                     <div class="input-group col-sm-8">
-                                        <input type="text" class="form-control" id="authkey" placeholder="Authentication Key" name="authkey" required="true">
+                                        <input type="password" class="form-control" id="authkey" placeholder="Authentication Key" name="authkey" required="true">
                                     </div>
                                 </div>
 

@@ -1,5 +1,5 @@
                 <!-- Page Heading -->
-                <div class="row"><h3>Account Groups <small><%= $filterheader %>Overview</small></h2><hr></div>
+                <div class="row"><h3>Account Groups <small><%= $filterheader %>Overview</small></h3><hr></div>
                 <!-- /.row -->
 
                 <div class="row">
@@ -10,10 +10,10 @@
                                     <tr>
                                         <th width="2%"><input type="checkbox" id="select_all" name="select_all" value="1"></th>
                                         <th width="10%">User Name</th>
-                                        <th width="5%">ACS 1</th>
-                                        <th width="5%">ISE 2</th>
-                                        <th width="9%">Intermapper 3</th>
-                                        <th width="8%">HP NA 4</th>
+                                        <th width="5%">ACS</th>
+                                        <th width="5%">ISE</th>
+                                        <th width="5%">Intermapper</th>
+                                        <th width="5%">HP NA</th>
                                         <!--<th width="8%">Cacti 5</th>
                                         <th width="7%">LDAP 6</th>
                                         <th width="5%">AD 7</th>
@@ -23,15 +23,15 @@
                                 </thead>
                                 <tbody>
 
-                % foreach my $accountgroup (sort keys %{$accountgroups}) {                
+                % foreach my $accountgroup (sort keys %{$accountgroups}) {
+                % next if $accountgroup =~ /^stub_/;
                                     <tr>
                                         <td><input type="checkbox" class="check_list" id="<%= $accountgroups->{$accountgroup}->{name} %>" name="check_<%= $accountgroups->{$accountgroup}->{name} %>" value="<%= $accountgroups->{$accountgroup}->{name} %>"></td>
-                                        </td>
-                                        <td><a href="/accountgroups/<%= $accountgroups->{$accountgroup}->{name} %>"><%= $accountgroups->{$accountgroup}->{name} %></a></td>
-                                        <td><i class="fa <%= $accountgroups->{$accountgroup}->{acs} %>" aria-hidden="true"></i></td>
-                                        <td><i class="fa <%= $accountgroups->{$accountgroup}->{ise} %>" aria-hidden="true"></i></td>
-                                        <td><i class="fa <%= $accountgroups->{$accountgroup}->{intermapper} %>" aria-hidden="true"></i></td>
-                                        <td><i class="fa <%= $accountgroups->{$accountgroup}->{hpna} %>" aria-hidden="true"></i></td>
+                                        <td><a href="/accountgroups/<%= $accountgroups->{$accountgroup}->{"name"} %>"><%= $accountgroups->{$accountgroup}->{"name"} %></a></td>
+                                        <td><i class="fa <%= $status->{$accountgroup}->{acs} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $status->{$accountgroup}->{ise} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $status->{$accountgroup}->{intermapper} %>" aria-hidden="true"></i></td>
+                                        <td><i class="fa <%= $status->{$accountgroup}->{na} %>" aria-hidden="true"></i></td>
                                         <!--<td><i class="fa <%= $accountgroups->{$accountgroup}->{cacti} %>" aria-hidden="true"></i></td>
                                         <td><i class="fa <%= $accountgroups->{$accountgroup}->{ldap} %>" aria-hidden="true"></i></td>
                                         <td><i class="fa <%= $accountgroups->{$accountgroup}->{ad} %>" aria-hidden="true"></i></td>

@@ -114,7 +114,7 @@
                                         <input type="text" class="form-control" id="na_comments" name="na_comments_<%= $uid %>" placeholder="Comments" value="<%= $account->{"na"}{$uid}{"comments"} %>">
                                     </div>
                                 </div>
-								<! -- Add Modification Date Fields -->
+								<!-- Add Modification Date Fields -->
                                 <div class="clearfix"></div>
                                 </div>
                                 </div> <!-- HP Network Automation Attributes Panel -->

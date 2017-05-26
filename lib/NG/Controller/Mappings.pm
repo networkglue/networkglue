@@ -5,7 +5,7 @@ use Data::Dumper;
 # This action will render a template
 sub show { # GET /mappings/123 - show mapping with id 123
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");
 
   my $filter = "";
@@ -21,14 +21,14 @@ sub show { # GET /mappings/123 - show mapping with id 123
 
 sub edit_form { # GET /mappings/123/edit - form to update a mapping
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");  
 }
 
 # This action will render a template
 sub index { # GET /mappings - list of all mappings
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $mappings = undef;
 
   my $sources_rs = $self->db->resultset('DsSource');
@@ -68,7 +68,7 @@ sub index { # GET /mappings - list of all mappings
 
 sub new_form { # GET /mappings/new - form to create a mappings
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $filter = "";
   my $filterheader = "";
   $self->stash(items => $self->items);
@@ -82,14 +82,14 @@ sub new_form { # GET /mappings/new - form to create a mappings
 
 sub update { # PUT /mappings/123 - update a mapping
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");    
 }
 
 
 sub delete { # DELETE /mappings/123 - delete a mapping
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");      
 }
 

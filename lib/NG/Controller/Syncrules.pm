@@ -12,7 +12,7 @@ my %table = {"ACS" => { "Users" => ["name", "enabled", "enablepassword", "dateex
 # This action will render a template
 sub show { # GET /syncrules/123 - show mapping with id 123
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");
 
   my $filter = "";
@@ -28,14 +28,14 @@ sub show { # GET /syncrules/123 - show mapping with id 123
 
 sub edit_form { # GET /syncrules/123/edit - form to update a mapping
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");  
 }
 
 # This action will render a template
 sub index { # GET /syncrules - list of all syncrules
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $syncrules = undef;
 
   my $sources_rs = $self->db->resultset('DsSource');
@@ -67,7 +67,7 @@ sub index { # GET /syncrules - list of all syncrules
 
 sub new_form { # GET /syncrules/new - form to create a syncrules
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $filter = "";
   my $filterheader = "";
   $self->stash(items => $self->items);
@@ -81,14 +81,14 @@ sub new_form { # GET /syncrules/new - form to create a syncrules
 
 sub update { # PUT /syncrules/123 - update a mapping
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");    
 }
 
 
 sub delete { # DELETE /syncrules/123 - delete a mapping
   my $self = shift;
-  $self->redirect_to('/login/') if !$self->session('logged_in');
+  $self->redirect_to('/login/') && return if !$self->session('logged_in');
   my $id = $self->param("id");      
 }
 
